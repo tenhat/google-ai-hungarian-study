@@ -2,17 +2,25 @@
 import { GoogleGenAI, Chat, GenerateContentResponse, Type } from "@google/genai";
 import { ChatMessage, Correction } from "../types";
 
-const API_KEY = process.env.API_KEY;
+const getApiKey = () => process.env.GEMINI_API_KEY || process.env.API_KEY;
 
-if (!API_KEY) {
-  throw new Error("API_KEY environment variable is not set");
+let aiInstance: GoogleGenAI | null = null;
+function getAiInstance(): GoogleGenAI {
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    throw new Error("API_KEY environment variable is not set");
+  }
+  if (!aiInstance) {
+    aiInstance = new GoogleGenAI({ apiKey });
+  }
+  return aiInstance;
 }
 
-const ai = new GoogleGenAI({ apiKey: API_KEY });
 let chatInstance: Chat | null = null;
 
 function getChatInstance(): Chat {
   if (!chatInstance) {
+    const ai = getAiInstance();
     chatInstance = ai.chats.create({
       model: 'gemini-3-flash-preview',
       config: {
@@ -39,6 +47,7 @@ export async function getGrammarCorrection(sentence: string): Promise<Correction
   const prompt = `You are a helpful Hungarian grammar checker. Analyze the following sentence: "${sentence}". If it is grammatically correct, respond with only the JSON {"isCorrect": true}. If there are errors, respond with a JSON object with "isCorrect": false, a "correctedSentence" key with the corrected Hungarian sentence, and an "explanation" key with a brief, one-sentence explanation of the main error in Japanese.`;
 
   try {
+    const ai = getAiInstance();
     const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
         contents: prompt,
