@@ -11,6 +11,7 @@ interface WordBankContextType {
   addNewWord: (hungarian: string, japanese: string) => void;
   getStats: () => { newCount: number, learningCount: number, masteredCount: number };
   loading: boolean;
+  markAsMastered: (wordId: string) => void;
 }
 
 const WordBankContext = createContext<WordBankContextType | undefined>(undefined);
@@ -282,13 +283,38 @@ export const WordBankProvider: React.FC<{ children: ReactNode }> = ({ children }
     setWords(prevWords => [...prevWords, newWord]);
     setProgress(prevProgress => new Map(prevProgress.set(newWord.id, newProgressItem)));
     
+    
     // Sync
     if (user) {
         syncToFirestore(newWord, newProgressItem);
     }
   }, [words, user]);
 
-  const contextValue = { words, progress, getWordById, getWordsForQuiz, updateWordProgress, addNewWord, getStats, loading };
+  const markAsMastered = useCallback((wordId: string) => {
+    const currentProgress = progress.get(wordId);
+    if (!currentProgress) return;
+    const currentWord = words.find(w => w.id === wordId);
+    if (!currentWord) return;
+
+    const newProgress = { ...currentProgress };
+    newProgress.status = WordStatus.Mastered;
+    newProgress.interval = 365; // Set to a year or long duration
+    newProgress.easiness = 5.0; // Max easiness
+    
+    // Set next review to far future
+    const now = new Date();
+    now.setDate(now.getDate() + newProgress.interval);
+    newProgress.nextReviewDate = now.toISOString();
+
+    setProgress(new Map(progress.set(wordId, newProgress)));
+
+    // Sync
+    if (user) {
+        syncToFirestore(currentWord, newProgress);
+    }
+  }, [progress, words, user]);
+
+  const contextValue = { words, progress, getWordById, getWordsForQuiz, updateWordProgress, addNewWord, getStats, loading, markAsMastered };
   return React.createElement(WordBankContext.Provider, { value: contextValue }, children);
 };
 

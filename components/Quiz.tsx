@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useWordBank } from '../hooks/useWordBank';
 import { Word, QuizMode } from '../types';
-import { ArrowRight, Volume2, Check, X } from 'lucide-react';
+import { ArrowRight, Volume2, Check, X, CheckCircle } from 'lucide-react';
 
 const Quiz: React.FC = () => {
-  const { words, getWordsForQuiz, updateWordProgress, getWordById, progress } = useWordBank();
+  const { words, getWordsForQuiz, updateWordProgress, getWordById, progress, markAsMastered } = useWordBank();
   const [quizWords, setQuizWords] = useState<Word[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [options, setOptions] = useState<string[]>([]);
@@ -71,6 +71,12 @@ const Quiz: React.FC = () => {
     }
   };
 
+  const handleMastered = () => {
+    if (selectedOption) return; // Prevent if already answered
+    markAsMastered(currentWord.id);
+    handleNext();
+  };
+
   if (quizWords.length === 0) {
     return (
       <div className="flex-grow flex flex-col justify-center items-center text-center p-4">
@@ -107,6 +113,17 @@ const Quiz: React.FC = () => {
                         </button>
                     )}
                 </div>
+            </div>
+
+            <div className="flex justify-end">
+                <button 
+                  onClick={handleMastered}
+                  className="flex items-center gap-2 text-green-600 hover:text-green-700 font-semibold px-4 py-2 rounded-lg hover:bg-green-50 transition-colors"
+                  title="Already know this word? Skip it."
+                >
+                    <CheckCircle size={20} />
+                    <span>I know this</span>
+                </button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
