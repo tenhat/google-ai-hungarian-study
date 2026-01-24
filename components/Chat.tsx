@@ -95,17 +95,24 @@ const Chat: React.FC = () => {
             <div className={`max-w-xs md:max-w-md lg:max-w-lg p-3 rounded-2xl ${message.role === 'user' ? 'bg-blue-500 text-white rounded-br-lg' : 'bg-slate-200 text-slate-800 rounded-bl-lg'}`}>
               <p>
                 {message.role === 'model' 
-                 ? message.text.split(' ').map((word, i) => (
-                    <span 
-                        key={i} 
-                        onClick={() => handleWordClick(word, message.text)} 
-                        className="cursor-pointer hover:bg-yellow-200 rounded px-1 py-0.5 inline-block"
-                        role="button"
-                        tabIndex={0}
-                    >
-                        {word}{' '}
-                    </span>
-                 ))
+                 ? message.text.split(/([a-zA-ZáéíóöőúüűÁÉÍÓÖŐÚÜŰ0-9]+)/g).map((part, i) => {
+                    const isWord = /^[a-zA-ZáéíóöőúüűÁÉÍÓÖŐÚÜŰ0-9]+$/.test(part);
+                    if (isWord) {
+                        return (
+                            <span 
+                                key={i} 
+                                onClick={() => handleWordClick(part, message.text)} 
+                                className="cursor-pointer hover:bg-yellow-200 rounded px-0.5 inline-block"
+                                role="button"
+                                tabIndex={0}
+                            >
+                                {part}
+                            </span>
+                        );
+                    } else {
+                        return <span key={i}>{part}</span>;
+                    }
+                 })
                  : message.text
                 }
               </p>
