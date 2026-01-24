@@ -15,10 +15,14 @@ const Quiz: React.FC = () => {
   const currentWord = useMemo(() => quizWords[currentIndex], [quizWords, currentIndex]);
 
   useEffect(() => {
-    const dueWords = getWordsForQuiz(10);
-    setQuizWords(dueWords);
-    setCurrentIndex(0);
-  }, [words, progress]);
+    // Only load quiz words if we don't have them yet and words are loaded
+    if (quizWords.length === 0 && words.length > 0) {
+      const dueWords = getWordsForQuiz(10);
+      setQuizWords(dueWords);
+      setCurrentIndex(0);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [words.length]);
 
   useEffect(() => {
     if (currentWord) {
