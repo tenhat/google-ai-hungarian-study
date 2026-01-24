@@ -28,7 +28,7 @@ const Quiz: React.FC = () => {
     if (currentWord) {
       // Determine quiz mode and generate options for the new word in one go
       // to ensure consistency and prevent state changes on re-renders for the same question.
-      const newQuizMode = Math.random() < 0.5 ? QuizMode.HuToJp : QuizMode.JpToHu;
+      const newQuizMode = QuizMode.HuToJp;
       setQuizMode(newQuizMode);
 
       const correctAnswer = newQuizMode === QuizMode.HuToJp ? currentWord.japanese : currentWord.hungarian;
