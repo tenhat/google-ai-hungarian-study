@@ -198,7 +198,7 @@ export const WordBankProvider: React.FC<{ children: ReactNode }> = ({ children }
     } else { 
         newProgress.lastCorrect = false;
         newProgress.repetitions = 0;
-        newProgress.interval = LEARNING_INTERVALS[0];
+        newProgress.interval = 0;
         newProgress.status = WordStatus.Learning;
     }
 
