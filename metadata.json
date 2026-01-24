@@ -1,0 +1,5 @@
+{
+  "name": "Hungarian Study Tenju",
+  "description": "An AI-powered application for learning Hungarian through a combination of vocabulary quizzes using a Spaced Repetition System (SRS) and interactive chat with an AI tutor.",
+  "requestFramePermissions": []
+}
