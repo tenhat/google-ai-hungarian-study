@@ -53,17 +53,30 @@ const Chat: React.FC = () => {
     setIsLoading(false);
   };
   
+  /* モーダル用State */
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedWord, setSelectedWord] = useState('');
+  const [japaneseMeaning, setJapaneseMeaning] = useState('');
+
   const handleWordClick = (word: string) => {
     const cleanedWord = word.replace(/[.,!?]/g, '').toLowerCase();
-    const japaneseMeaning = prompt(`「${cleanedWord}」を学習リストに追加しますか？\n日本語の意味を入力してください:`, "");
-    if (japaneseMeaning) {
-        addNewWord(cleanedWord, japaneseMeaning);
-        alert(`「${cleanedWord}」を学習リストに追加しました。`);
+    if (!cleanedWord) return;
+    
+    setSelectedWord(cleanedWord);
+    setJapaneseMeaning(''); // リセット
+    setIsModalOpen(true);
+  };
+
+  const handleSaveWord = () => {
+    if (selectedWord && japaneseMeaning) {
+        addNewWord(selectedWord, japaneseMeaning);
+        setIsModalOpen(false);
+        // 成功メッセージなどを表示しても良いが、今回はシンプルに閉じる
     }
   };
 
   return (
-    <div className="flex flex-col h-full max-h-[80vh] bg-white rounded-xl shadow-lg border border-slate-200">
+    <div className="flex flex-col h-full max-h-[80vh] bg-white rounded-xl shadow-lg border border-slate-200 relative">
       <div className="flex-grow p-4 overflow-y-auto space-y-4">
         {messages.map((message) => (
           <div key={message.id} className={`flex items-end gap-2 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
@@ -72,7 +85,15 @@ const Chat: React.FC = () => {
               <p>
                 {message.role === 'model' 
                  ? message.text.split(' ').map((word, i) => (
-                    <span key={i} onClick={() => handleWordClick(word)} className="cursor-pointer hover:bg-yellow-200 rounded px-1 py-0.5">{word} </span>
+                    <span 
+                        key={i} 
+                        onClick={() => handleWordClick(word)} 
+                        className="cursor-pointer hover:bg-yellow-200 rounded px-1 py-0.5 inline-block"
+                        role="button"
+                        tabIndex={0}
+                    >
+                        {word}{' '}
+                    </span>
                  ))
                  : message.text
                 }
@@ -128,6 +149,41 @@ const Chat: React.FC = () => {
           </button>
         </form>
       </div>
+
+      {/* 単語追加モーダル */}
+      {isModalOpen && (
+        <div className="absolute inset-0 bg-black/50 flex items-center justify-center p-4 z-50 rounded-xl">
+            <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-sm space-y-4">
+                <h3 className="text-lg font-bold text-slate-800">単語を追加: {selectedWord}</h3>
+                <div>
+                    <label className="block text-sm font-medium text-slate-600 mb-1">日本語の意味</label>
+                    <input 
+                        type="text" 
+                        value={japaneseMeaning}
+                        onChange={(e) => setJapaneseMeaning(e.target.value)}
+                        className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        placeholder="例: りんご"
+                        autoFocus
+                    />
+                </div>
+                <div className="flex justify-end gap-2 pt-2">
+                    <button 
+                        onClick={() => setIsModalOpen(false)}
+                        className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg"
+                    >
+                        キャンセル
+                    </button>
+                    <button 
+                        onClick={handleSaveWord}
+                        disabled={!japaneseMeaning.trim()}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-slate-300"
+                    >
+                        追加
+                    </button>
+                </div>
+            </div>
+        </div>
+      )}
     </div>
   );
 };
