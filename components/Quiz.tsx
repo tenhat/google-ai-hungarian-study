@@ -42,16 +42,6 @@ const Quiz: React.FC = () => {
     }
   }, [currentWord, words]);
 
-  const handleAnswer = (option: string) => {
-    if (selectedOption) return; // Prevent multiple answers
-
-    setSelectedOption(option);
-    const correctAnswer = quizMode === QuizMode.HuToJp ? currentWord.japanese : currentWord.hungarian;
-    const wasCorrect = option === correctAnswer;
-    setIsCorrect(wasCorrect);
-    updateWordProgress(currentWord.id, wasCorrect);
-  };
-  
   const handleNext = () => {
     setSelectedOption(null);
     setIsCorrect(null);
@@ -62,6 +52,22 @@ const Quiz: React.FC = () => {
         const dueWords = getWordsForQuiz(10);
         setQuizWords(dueWords);
         setCurrentIndex(0);
+    }
+  };
+
+  const handleAnswer = (option: string) => {
+    if (selectedOption) return; // Prevent multiple answers
+
+    setSelectedOption(option);
+    const correctAnswer = quizMode === QuizMode.HuToJp ? currentWord.japanese : currentWord.hungarian;
+    const wasCorrect = option === correctAnswer;
+    setIsCorrect(wasCorrect);
+    updateWordProgress(currentWord.id, wasCorrect);
+
+    if (wasCorrect) {
+        setTimeout(() => {
+            handleNext();
+        }, 500);
     }
   };
 
@@ -130,9 +136,11 @@ const Quiz: React.FC = () => {
                             {!isCorrect && <p className="text-red-700">Correct answer: {correctAnswer}</p>}
                         </div>
                     </div>
-                    <button onClick={handleNext} className="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg shadow hover:bg-blue-700 transition-colors flex items-center gap-2">
-                        Next <ArrowRight size={20} />
-                    </button>
+                    {!isCorrect && (
+                        <button onClick={handleNext} className="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg shadow hover:bg-blue-700 transition-colors flex items-center gap-2">
+                            Next <ArrowRight size={20} />
+                        </button>
+                    )}
                 </div>
             )}
         </div>

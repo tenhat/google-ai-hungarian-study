@@ -2,16 +2,25 @@
 import React from 'react';
 import { View } from '../types';
 import { useWordBank } from '../hooks/useWordBank';
-import { BrainCircuit, MessageSquare, CheckCircle, Clock, Star } from 'lucide-react';
+import { BrainCircuit, MessageSquare, CheckCircle, Clock, Star, Loader } from 'lucide-react';
 
 interface HomeProps {
   setCurrentView: (view: View) => void;
 }
 
 const Home: React.FC<HomeProps> = ({ setCurrentView }) => {
-  const { getStats, getWordsForQuiz } = useWordBank();
+  const { getStats, getWordsForQuiz, loading } = useWordBank();
   const stats = getStats();
   const dueWordsCount = getWordsForQuiz(100).length; // Get all due words
+
+  if (loading) {
+    return (
+      <div className="flex-grow flex flex-col justify-center items-center p-4">
+        <Loader className="animate-spin text-blue-600" size={48} />
+        <p className="text-slate-500 mt-4 font-medium">Loading your progress...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-grow flex flex-col justify-center items-center p-4 space-y-8">

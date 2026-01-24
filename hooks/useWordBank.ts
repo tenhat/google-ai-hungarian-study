@@ -10,6 +10,7 @@ interface WordBankContextType {
   updateWordProgress: (wordId: string, correct: boolean) => void;
   addNewWord: (hungarian: string, japanese: string) => void;
   getStats: () => { newCount: number, learningCount: number, masteredCount: number };
+  loading: boolean;
 }
 
 const WordBankContext = createContext<WordBankContextType | undefined>(undefined);
@@ -24,11 +25,13 @@ import { useAuth } from '../contexts/AuthContext';
 export const WordBankProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [words, setWords] = useState<Word[]>([]);
   const [progress, setProgress] = useState<Map<string, WordProgress>>(new Map());
+  const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
   // Load logic depends on auth state
   useEffect(() => {
     const loadData = async () => {
+        setLoading(true);
         if (user) {
             // Load from Firestore
             try {
@@ -41,6 +44,39 @@ export const WordBankProvider: React.FC<{ children: ReactNode }> = ({ children }
                     loadedWords.push(data.word as Word);
                     loadedProgress.push(data.progress as WordProgress);
                 });
+
+                // Check for missing INITIAL_WORDS (New words migration)
+                const loadedWordIds = new Set(loadedWords.map(w => w.id));
+                const missingWords = INITIAL_WORDS.filter(w => !loadedWordIds.has(w.id));
+
+                if (missingWords.length > 0) {
+                    console.log(`Found ${missingWords.length} missing words. Syncing to Firestore...`);
+                    const batch = writeBatch(db);
+                    
+                    missingWords.forEach(word => {
+                        const newProgress: WordProgress = {
+                            wordId: word.id,
+                            status: WordStatus.New,
+                            easiness: INITIAL_EASINESS,
+                            interval: 0,
+                            repetitions: 0,
+                            nextReviewDate: new Date().toISOString(),
+                            lastCorrect: null,
+                            addedFromChat: false
+                        };
+                        
+                        // Add to local arrays to update state immediately
+                        loadedWords.push(word);
+                        loadedProgress.push(newProgress);
+
+                        // Add to Firestore batch
+                        const ref = doc(db, `users/${user.uid}/words`, word.id);
+                        batch.set(ref, { word, progress: newProgress });
+                    });
+
+                    await batch.commit();
+                    console.log("Missing words synced successfully.");
+                }
 
                 if (loadedWords.length > 0) {
                     setWords(loadedWords);
@@ -107,6 +143,7 @@ export const WordBankProvider: React.FC<{ children: ReactNode }> = ({ children }
             });
             setProgress(progressMap);
         }
+        setLoading(false);
     };
 
     loadData();
@@ -251,7 +288,7 @@ export const WordBankProvider: React.FC<{ children: ReactNode }> = ({ children }
     }
   }, [words, user]);
 
-  const contextValue = { words, progress, getWordById, getWordsForQuiz, updateWordProgress, addNewWord, getStats };
+  const contextValue = { words, progress, getWordById, getWordsForQuiz, updateWordProgress, addNewWord, getStats, loading };
   return React.createElement(WordBankContext.Provider, { value: contextValue }, children);
 };
 
