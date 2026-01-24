@@ -1,8 +1,8 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { getChatResponse, getGrammarCorrection } from '../services/geminiService';
+import { getChatResponse, getGrammarCorrection, getWordTranslation } from '../services/geminiService';
 import { ChatMessage } from '../types';
-import { Send, CheckCircle, AlertCircle, Sparkles } from 'lucide-react';
+import { Send, CheckCircle, AlertCircle, Sparkles, Loader2 } from 'lucide-react';
 import { useWordBank } from '../hooks/useWordBank';
 
 const Chat: React.FC = () => {
@@ -57,14 +57,25 @@ const Chat: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedWord, setSelectedWord] = useState('');
   const [japaneseMeaning, setJapaneseMeaning] = useState('');
+  const [isTranslating, setIsTranslating] = useState(false);
 
-  const handleWordClick = (word: string) => {
-    const cleanedWord = word.replace(/[.,!?]/g, '').toLowerCase();
+  const handleWordClick = async (word: string, fullText: string) => {
+    const cleanedWord = word.replace(/[.,!?()]/g, '').toLowerCase(); // ()も削除
     if (!cleanedWord) return;
     
     setSelectedWord(cleanedWord);
     setJapaneseMeaning(''); // リセット
+    setIsTranslating(true);
     setIsModalOpen(true);
+
+    try {
+        const translation = await getWordTranslation(cleanedWord, fullText);
+        setJapaneseMeaning(translation);
+    } catch (error) {
+        console.error("Translation failed", error);
+    } finally {
+        setIsTranslating(false);
+    }
   };
 
   const handleSaveWord = () => {
@@ -87,7 +98,7 @@ const Chat: React.FC = () => {
                  ? message.text.split(' ').map((word, i) => (
                     <span 
                         key={i} 
-                        onClick={() => handleWordClick(word)} 
+                        onClick={() => handleWordClick(word, message.text)} 
                         className="cursor-pointer hover:bg-yellow-200 rounded px-1 py-0.5 inline-block"
                         role="button"
                         tabIndex={0}
@@ -157,14 +168,21 @@ const Chat: React.FC = () => {
                 <h3 className="text-lg font-bold text-slate-800">単語を追加: {selectedWord}</h3>
                 <div>
                     <label className="block text-sm font-medium text-slate-600 mb-1">日本語の意味</label>
-                    <input 
-                        type="text" 
-                        value={japaneseMeaning}
-                        onChange={(e) => setJapaneseMeaning(e.target.value)}
-                        className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                        placeholder="例: りんご"
-                        autoFocus
-                    />
+                    <div className="relative">
+                        <input 
+                            type="text" 
+                            value={japaneseMeaning}
+                            onChange={(e) => setJapaneseMeaning(e.target.value)}
+                            className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none pr-8"
+                            placeholder={isTranslating ? "翻訳中..." : "例: りんご"}
+                            autoFocus
+                        />
+                        {isTranslating && (
+                            <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                                <Loader2 className="animate-spin text-slate-400" size={16} />
+                            </div>
+                        )}
+                    </div>
                 </div>
                 <div className="flex justify-end gap-2 pt-2">
                     <button 
@@ -175,8 +193,8 @@ const Chat: React.FC = () => {
                     </button>
                     <button 
                         onClick={handleSaveWord}
-                        disabled={!japaneseMeaning.trim()}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-slate-300"
+                        disabled={!japaneseMeaning.trim() || isTranslating}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-slate-300 transition-colors"
                     >
                         追加
                     </button>

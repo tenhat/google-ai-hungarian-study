@@ -22,7 +22,7 @@ function getChatInstance(): Chat {
   if (!chatInstance) {
     const ai = getAiInstance();
     chatInstance = ai.chats.create({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-2.5-flash',
       config: {
         systemInstruction: "You are a friendly and patient Hungarian language tutor named Tenju. Your replies should be in Hungarian. Keep your sentences relatively simple for a beginner-to-intermediate learner. Do not use markdown.",
       },
@@ -49,7 +49,7 @@ export async function getGrammarCorrection(sentence: string): Promise<Correction
   try {
     const ai = getAiInstance();
     const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
+        model: "gemini-2.5-flash",
         contents: prompt,
         config: {
             responseMimeType: "application/json",
@@ -83,4 +83,24 @@ export async function getGrammarCorrection(sentence: string): Promise<Correction
     // In case of error, assume the sentence is correct to not block the user.
     return { isCorrect: true };
   }
+}
+
+export async function getWordTranslation(word: string, context: string): Promise<string> {
+    const prompt = `Translate the Hungarian word '${word}' into Japanese based on this context: '${context}'. Return ONLY the Japanese translation word or short phrase. Do not include any explanation or extra text.`;
+
+    try {
+        const chat = getChatInstance();
+        // Using chat instance to keep context if possible, or just single generation
+        const ai = getAiInstance();
+        const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: prompt,
+        });
+
+        const translation = response.text;
+        return translation ? translation.trim() : "";
+    } catch (error) {
+        console.error("Error getting word translation:", error);
+        return "";
+    }
 }
