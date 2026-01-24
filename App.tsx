@@ -8,6 +8,8 @@ import { View } from './types';
 import Header from './components/shared/Header';
 import { BrainCircuit, MessageSquare, HomeIcon } from 'lucide-react';
 
+import { AuthProvider } from './contexts/AuthContext';
+
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<View>(View.Home);
 
@@ -24,8 +26,9 @@ const App: React.FC = () => {
   };
 
   return (
-    <WordBankProvider>
-      <div className="min-h-screen bg-slate-100 flex flex-col">
+    <AuthProvider>
+      <WordBankProvider>
+        <div className="min-h-screen bg-slate-100 flex flex-col">
         <Header />
         <main className="flex-grow container mx-auto p-4 flex flex-col">
           {renderView()}
@@ -56,7 +59,8 @@ const App: React.FC = () => {
           </div>
         </nav>
       </div>
-    </WordBankProvider>
+      </WordBankProvider>
+    </AuthProvider>
   );
 };
 
