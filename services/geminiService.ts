@@ -24,7 +24,7 @@ function getChatInstance(): Chat {
     chatInstance = ai.chats.create({
       model: 'gemini-2.5-flash',
       config: {
-        systemInstruction: "You are a friendly and patient Hungarian language tutor named Tenju. Your replies must be in JSON format with two keys: 'hungarian' (your reply in Hungarian) and 'japanese' (the Japanese translation of your reply). Avoid overly short or curt responses. Instead, provide natural, complete sentences that are helpful for a beginner-to-intermediate learner. Do not use markdown in the content.",
+        systemInstruction: "You are a friendly and patient Hungarian language tutor named Tenju. Your replies must be in JSON format with three keys: 'hungarian' (your full reply in Hungarian), 'japanese' (the full Japanese translation), and 'segments' (an array of objects, each containing 'hungarian' and 'japanese' keys representing corresponding sentence pairs). Avoid overly short or curt responses. Instead, provide natural, complete sentences that are helpful for a beginner-to-intermediate learner. Do not use markdown in the content.",
         responseMimeType: "application/json",
       },
     });
@@ -33,7 +33,7 @@ function getChatInstance(): Chat {
 }
 
 
-export async function getChatResponse(history: ChatMessage[], newMessage: string): Promise<{ text: string, translation: string }> {
+export async function getChatResponse(history: ChatMessage[], newMessage: string): Promise<{ text: string, translation: string, segments?: { hungarian: string, japanese: string }[] }> {
   const chat = getChatInstance();
   try {
     const response: GenerateContentResponse = await chat.sendMessage({ message: newMessage });
@@ -48,7 +48,8 @@ export async function getChatResponse(history: ChatMessage[], newMessage: string
         const parsed = JSON.parse(responseText);
         return {
             text: parsed.hungarian,
-            translation: parsed.japanese
+            translation: parsed.japanese,
+            segments: parsed.segments
         };
     } catch (e) {
         console.error("Failed to parse JSON response", e);
@@ -129,9 +130,9 @@ export async function getWordTranslation(word: string, context: string): Promise
     }
 }
 
-export async function getDailyQuestion(): Promise<{ text: string, translation: string }> {
+export async function getDailyQuestion(): Promise<{ text: string, translation: string, segments?: { hungarian: string, japanese: string }[] }> {
     const prompt = `Generate a simple, open-ended question in Hungarian to start a conversation with a beginner learner (e.g., about their day, plans, favorites). 
-    Return ONLY a JSON object with two keys: 'hungarian' (the question) and 'japanese' (the Japanese translation).`;
+    Return ONLY a JSON object with three keys: 'hungarian' (the question), 'japanese' (the Japanese translation), and 'segments' (an array of sentence pair objects).`;
 
     try {
         const ai = getAiInstance();
@@ -149,7 +150,8 @@ export async function getDailyQuestion(): Promise<{ text: string, translation: s
             const parsed = JSON.parse(responseText);
             return {
                 text: parsed.hungarian,
-                translation: parsed.japanese
+                translation: parsed.japanese,
+                segments: parsed.segments
             };
         }
         return { text: "Hogy vagy ma?", translation: "今日は元気ですか？" };

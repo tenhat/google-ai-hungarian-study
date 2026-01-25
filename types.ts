@@ -44,6 +44,7 @@ export interface ChatMessage {
   role: 'user' | 'model';
   text: string;
   translation?: string;
+  segments?: { hungarian: string; japanese: string; }[];
   correction?: Correction;
   timestamp: number;
 }

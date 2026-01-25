@@ -34,6 +34,7 @@ const Chat: React.FC = () => {
                         role: 'model',
                         text: dailyQ.text,
                         translation: dailyQ.translation,
+                        segments: dailyQ.segments,
                         timestamp: Date.now()
                     }]);
                 }
@@ -68,13 +69,14 @@ const Chat: React.FC = () => {
     setMessages(prev => prev.map(msg => msg.id === userMessage.id ? {...msg, correction} : msg));
 
     const correctedSentence = correction.isCorrect ? userInput : (correction.correctedSentence || userInput);
-    const { text: aiResponseText, translation } = await getChatResponse(messages, correctedSentence);
+    const { text: aiResponseText, translation, segments } = await getChatResponse(messages, correctedSentence);
 
     const aiMessage: ChatMessage = {
       id: `model-${Date.now()}`,
       role: 'model',
       text: aiResponseText,
       translation: translation,
+      segments: segments,
       timestamp: Date.now(),
     };
 
@@ -97,35 +99,41 @@ const Chat: React.FC = () => {
       return match ? match.trim() : "";
   };
 
-  const handleWordClick = async (word: string, fullText: string, translationText?: string) => {
+  const handleWordClick = async (word: string, fullText: string, translationText?: string, segments?: { hungarian: string; japanese: string; }[]) => {
     const cleanedWord = word.replace(/[.,!?()]/g, '').toLowerCase(); 
     if (!cleanedWord) return;
     
     setSelectedWord(cleanedWord);
     setJapaneseMeaning(''); 
     
-    // Auto-extract sentence
-    const extractedSentence = extractSentence(fullText, word);
-    setExampleSentence(extractedSentence);
-    
-    // Attempt to extract translation key sentence
-    // This is heuristics-based since translationText might not align 1:1 perfectly or be hard to split exactly same way.
-    // For now, if translationText is present, we try to grab a sentence that looks like it corresponds,
-    // OR we just put the whole translation text if it's short, OR we leave it empty for manual edit.
-    // Given the user request implies a specific correspondence, let's try to map by index if possible?
-    // "összetett" -> "tanulásában" context...
-    // Actually, "A 'tanulásában' szó egy összetett nyelvtani alak." is the FIRST sentence.
-    // So if we find the word in the Nth sentence, we might guess the Nth sentence of translation is the match.
+    let extractedSentence = "";
     let extractedTranslation = "";
-    if (translationText && extractedSentence) {
-        const huSentences = fullText.match(/[^.!?]+[.!?]+/g) || [fullText];
-        const jpSentences = translationText.match(/[^。！？]+[。！？]+/g) || [translationText];
-        
-        const index = huSentences.findIndex(s => s.includes(extractedSentence));
-        if (index !== -1 && index < jpSentences.length) {
-            extractedTranslation = jpSentences[index].trim();
+
+    // 1. Try to find in segments (Highest Priority)
+    if (segments && segments.length > 0) {
+        const matchingSegment = segments.find(seg => seg.hungarian.toLowerCase().includes(cleanedWord));
+        if (matchingSegment) {
+            extractedSentence = matchingSegment.hungarian.trim();
+            extractedTranslation = matchingSegment.japanese.trim();
+        }
+    } 
+    
+    // 2. Fallback to heuristic extraction if segments failed or missing
+    if (!extractedSentence) {
+        extractedSentence = extractSentence(fullText, word);
+        // Translation fallback logic
+        if (translationText && extractedSentence) {
+            const huSentences = fullText.match(/[^.!?]+[.!?]+/g) || [fullText];
+            const jpSentences = translationText.match(/[^。！？]+[。！？]+/g) || [translationText];
+            
+            const index = huSentences.findIndex(s => s.includes(extractedSentence));
+            if (index !== -1 && index < jpSentences.length) {
+                extractedTranslation = jpSentences[index].trim();
+            }
         }
     }
+
+    setExampleSentence(extractedSentence);
     setExampleTranslation(extractedTranslation);
 
     setIsTranslating(true);
@@ -166,7 +174,7 @@ const Chat: React.FC = () => {
                         return (
                             <span 
                                 key={i} 
-                                onClick={() => handleWordClick(part, message.text, message.translation)} 
+                                onClick={() => handleWordClick(part, message.text, message.translation, message.segments)} 
                                 className="cursor-pointer hover:bg-yellow-200 rounded px-0.5 inline-block"
                                 role="button"
                                 tabIndex={0}
