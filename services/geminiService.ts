@@ -24,7 +24,7 @@ function getChatInstance(): Chat {
     chatInstance = ai.chats.create({
       model: 'gemini-2.5-flash',
       config: {
-        systemInstruction: "You are a friendly and patient Hungarian language tutor named Tenju. Your replies must be in JSON format with two keys: 'hungarian' (your reply in Hungarian) and 'japanese' (the Japanese translation of your reply). Keep your sentences relatively simple for a beginner-to-intermediate learner. Do not use markdown in the content.",
+        systemInstruction: "You are a friendly and patient Hungarian language tutor named Tenju. Your replies must be in JSON format with two keys: 'hungarian' (your reply in Hungarian) and 'japanese' (the Japanese translation of your reply). Avoid overly short or curt responses. Instead, provide natural, complete sentences that are helpful for a beginner-to-intermediate learner. Do not use markdown in the content.",
         responseMimeType: "application/json",
       },
     });
