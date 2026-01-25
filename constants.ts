@@ -2,11 +2,11 @@
 import { Word } from './types';
 
 export const INITIAL_WORDS: Word[] = [
-  { id: 'word_001', hungarian: 'alma', japanese: 'りんご' },
-  { id: 'word_002', hungarian: 'kutya', japanese: '犬' },
-  { id: 'word_003', hungarian: 'ház', japanese: '家' },
-  { id: 'word_004', hungarian: 'könyv', japanese: '本' },
-  { id: 'word_005', hungarian: 'asztal', japanese: 'テーブル' },
+  { id: 'word_001', hungarian: 'alma', japanese: 'りんご', example: { sentence: 'Az alma piros.', translation: 'そのリンゴは赤いです。' } },
+  { id: 'word_002', hungarian: 'kutya', japanese: '犬', example: { sentence: 'A kutya ugat.', translation: '犬が吠えています。' } },
+  { id: 'word_003', hungarian: 'ház', japanese: '家', example: { sentence: 'Ez egy nagy ház.', translation: 'これは大きな家です。' } },
+  { id: 'word_004', hungarian: 'könyv', japanese: '本', example: { sentence: 'Olvasok egy könyvet.', translation: '私は本を読んでいます。' } },
+  { id: 'word_005', hungarian: 'asztal', japanese: 'テーブル', example: { sentence: 'A könyv az asztalon van.', translation: '本はテーブルの上にあります。' } },
   { id: 'word_006', hungarian: 'szék', japanese: '椅子' },
   { id: 'word_007', hungarian: 'víz', japanese: '水' },
   { id: 'word_008', hungarian: 'kenyér', japanese: 'パン' },

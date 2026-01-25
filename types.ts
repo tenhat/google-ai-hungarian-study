@@ -4,6 +4,10 @@ export interface Word {
   hungarian: string;
   japanese: string;
   context?: string;
+  example?: {
+    sentence: string;
+    translation: string;
+  };
 }
 
 export enum WordStatus {

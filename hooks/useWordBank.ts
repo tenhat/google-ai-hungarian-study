@@ -79,6 +79,42 @@ export const WordBankProvider: React.FC<{ children: ReactNode }> = ({ children }
                     console.log("Missing words synced successfully.");
                 }
 
+                // Check for updates in existing words (e.g. added examples)
+                const updatesNeeded: Word[] = [];
+                INITIAL_WORDS.forEach(initialWord => {
+                    const loadedWord = loadedWords.find(w => w.id === initialWord.id);
+                    if (loadedWord) {
+                        // Compare content (ignoring key order strictly, but JSON.stringify is usually fine for this simple data)
+                        // To be safer, we can check specific fields or just overwrite if we trust INITIAL_WORDS is master for definitions
+                        if (JSON.stringify(initialWord) !== JSON.stringify(loadedWord)) {
+                            updatesNeeded.push(initialWord);
+                        }
+                    }
+                });
+
+                if (updatesNeeded.length > 0) {
+                    console.log(`Found ${updatesNeeded.length} words needing updates. Syncing...`);
+                    const batch = writeBatch(db);
+                    updatesNeeded.forEach(word => {
+                         // Update local state
+                         const index = loadedWords.findIndex(w => w.id === word.id);
+                         if (index !== -1) {
+                             loadedWords[index] = word;
+                         }
+
+                         // Update Firestore
+                         const ref = doc(db, `users/${user.uid}/words`, word.id);
+                         batch.set(ref, { word }, { merge: true });
+                    });
+                    
+                    if (missingWords.length === 0) {
+                        // Only commit if we didn't just commit above (though they are separate batches, so it's fine)
+                        // Actually, reusing specific batch variables in block scopes
+                    }
+                    await batch.commit();
+                    console.log("Words updated successfully.");
+                }
+
                 if (loadedWords.length > 0) {
                     setWords(loadedWords);
                     const progressMap = new Map<string, WordProgress>();
