@@ -8,7 +8,7 @@ interface WordBankContextType {
   getWordById: (id: string) => Word | undefined;
   getWordsForQuiz: (count: number) => Word[];
   updateWordProgress: (wordId: string, correct: boolean) => void;
-  addNewWord: (hungarian: string, japanese: string) => void;
+  addNewWord: (hungarian: string, japanese: string, example?: { sentence: string, translation: string }) => void;
   getStats: () => { newCount: number, learningCount: number, masteredCount: number };
   loading: boolean;
   markAsMastered: (wordId: string) => void;
@@ -294,7 +294,7 @@ export const WordBankProvider: React.FC<{ children: ReactNode }> = ({ children }
     }
   }, [progress, words, user]);
 
-  const addNewWord = useCallback((hungarian: string, japanese: string) => {
+  const addNewWord = useCallback((hungarian: string, japanese: string, example?: { sentence: string, translation: string }) => {
     const existingWord = words.find(w => w.hungarian.toLowerCase() === hungarian.toLowerCase());
     if (existingWord) return;
 
@@ -302,7 +302,8 @@ export const WordBankProvider: React.FC<{ children: ReactNode }> = ({ children }
         id: `word_${new Date().getTime()}`,
         hungarian,
         japanese,
-        context: "AIチャットで登場"
+        context: "AIチャットで登場",
+        example
     };
 
     const newProgressItem: WordProgress = {

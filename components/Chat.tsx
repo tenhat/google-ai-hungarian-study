@@ -58,14 +58,48 @@ const Chat: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedWord, setSelectedWord] = useState('');
   const [japaneseMeaning, setJapaneseMeaning] = useState('');
+  const [exampleSentence, setExampleSentence] = useState('');
+  const [exampleTranslation, setExampleTranslation] = useState('');
   const [isTranslating, setIsTranslating] = useState(false);
 
-  const handleWordClick = async (word: string, fullText: string) => {
-    const cleanedWord = word.replace(/[.,!?()]/g, '').toLowerCase(); // ()も削除
+  const extractSentence = (text: string, word: string): string => {
+      // Simple splitting by punctuation. Can be improved.
+      const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+      const match = sentences.find(s => s.toLowerCase().includes(word.toLowerCase()));
+      return match ? match.trim() : "";
+  };
+
+  const handleWordClick = async (word: string, fullText: string, translationText?: string) => {
+    const cleanedWord = word.replace(/[.,!?()]/g, '').toLowerCase(); 
     if (!cleanedWord) return;
     
     setSelectedWord(cleanedWord);
-    setJapaneseMeaning(''); // リセット
+    setJapaneseMeaning(''); 
+    
+    // Auto-extract sentence
+    const extractedSentence = extractSentence(fullText, word);
+    setExampleSentence(extractedSentence);
+    
+    // Attempt to extract translation key sentence
+    // This is heuristics-based since translationText might not align 1:1 perfectly or be hard to split exactly same way.
+    // For now, if translationText is present, we try to grab a sentence that looks like it corresponds,
+    // OR we just put the whole translation text if it's short, OR we leave it empty for manual edit.
+    // Given the user request implies a specific correspondence, let's try to map by index if possible?
+    // "összetett" -> "tanulásában" context...
+    // Actually, "A 'tanulásában' szó egy összetett nyelvtani alak." is the FIRST sentence.
+    // So if we find the word in the Nth sentence, we might guess the Nth sentence of translation is the match.
+    let extractedTranslation = "";
+    if (translationText && extractedSentence) {
+        const huSentences = fullText.match(/[^.!?]+[.!?]+/g) || [fullText];
+        const jpSentences = translationText.match(/[^。！？]+[。！？]+/g) || [translationText];
+        
+        const index = huSentences.findIndex(s => s.includes(extractedSentence));
+        if (index !== -1 && index < jpSentences.length) {
+            extractedTranslation = jpSentences[index].trim();
+        }
+    }
+    setExampleTranslation(extractedTranslation);
+
     setIsTranslating(true);
     setIsModalOpen(true);
 
@@ -81,7 +115,9 @@ const Chat: React.FC = () => {
 
   const handleSaveWord = () => {
     if (selectedWord && japaneseMeaning) {
-        addNewWord(selectedWord, japaneseMeaning);
+        addNewWord(selectedWord, japaneseMeaning, 
+            (exampleSentence && exampleTranslation) ? { sentence: exampleSentence, translation: exampleTranslation } : undefined
+        );
         setIsModalOpen(false);
         // 成功メッセージなどを表示しても良いが、今回はシンプルに閉じる
     }
@@ -102,7 +138,7 @@ const Chat: React.FC = () => {
                         return (
                             <span 
                                 key={i} 
-                                onClick={() => handleWordClick(part, message.text)} 
+                                onClick={() => handleWordClick(part, message.text, message.translation)} 
                                 className="cursor-pointer hover:bg-yellow-200 rounded px-0.5 inline-block"
                                 role="button"
                                 tabIndex={0}
@@ -196,6 +232,26 @@ const Chat: React.FC = () => {
                             </div>
                         )}
                     </div>
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-slate-600 mb-1">例文 (自動抽出)</label>
+                    <textarea 
+                        value={exampleSentence}
+                        onChange={(e) => setExampleSentence(e.target.value)}
+                        className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
+                        rows={2}
+                        placeholder="例文を入力..."
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-slate-600 mb-1">例文の意味 (日本語)</label>
+                    <textarea 
+                        value={exampleTranslation}
+                        onChange={(e) => setExampleTranslation(e.target.value)}
+                        className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
+                        rows={2}
+                        placeholder="例文の日本語訳を入力..."
+                    />
                 </div>
                 <div className="flex justify-end gap-2 pt-2">
                     <button 
