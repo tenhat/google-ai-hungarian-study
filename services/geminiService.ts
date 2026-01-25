@@ -128,3 +128,33 @@ export async function getWordTranslation(word: string, context: string): Promise
         return "";
     }
 }
+
+export async function getDailyQuestion(): Promise<{ text: string, translation: string }> {
+    const prompt = `Generate a simple, open-ended question in Hungarian to start a conversation with a beginner learner (e.g., about their day, plans, favorites). 
+    Return ONLY a JSON object with two keys: 'hungarian' (the question) and 'japanese' (the Japanese translation).`;
+
+    try {
+        const ai = getAiInstance();
+        const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: prompt,
+            config: {
+                responseMimeType: "application/json",
+            }
+        });
+
+        // @ts-ignore
+        const responseText = response.text;
+        if (responseText) {
+            const parsed = JSON.parse(responseText);
+            return {
+                text: parsed.hungarian,
+                translation: parsed.japanese
+            };
+        }
+        return { text: "Hogy vagy ma?", translation: "今日は元気ですか？" };
+    } catch (error) {
+        console.error("Error getting daily question:", error);
+        return { text: "Szia! Mit csinálsz?", translation: "こんにちは！何をしていますか？" };
+    }
+}

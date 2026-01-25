@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { getChatResponse, getGrammarCorrection, getWordTranslation } from '../services/geminiService';
+import { getChatResponse, getGrammarCorrection, getWordTranslation, getDailyQuestion } from '../services/geminiService';
 import { ChatMessage } from '../types';
 import { Send, CheckCircle, AlertCircle, Sparkles, Loader2 } from 'lucide-react';
 import { useWordBank } from '../hooks/useWordBank';
@@ -19,6 +19,34 @@ const Chat: React.FC = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Daily Question
+  useEffect(() => {
+    let mounted = true;
+    const fetchDailyQuestion = async () => {
+        if (messages.length === 0) {
+             setIsLoading(true);
+             try {
+                const dailyQ = await getDailyQuestion();
+                if (mounted) {
+                    setMessages([{
+                        id: `model-daily-${Date.now()}`,
+                        role: 'model',
+                        text: dailyQ.text,
+                        translation: dailyQ.translation,
+                        timestamp: Date.now()
+                    }]);
+                }
+             } catch (e) {
+                 console.error("Failed to fetch daily question", e);
+             } finally {
+                 if (mounted) setIsLoading(false);
+             }
+        }
+    };
+    fetchDailyQuestion();
+    return () => { mounted = false; };
+  }, []); // Run once on mount
   
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
