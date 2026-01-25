@@ -246,7 +246,16 @@ export const WordBankProvider: React.FC<{ children: ReactNode }> = ({ children }
     
     const wordIdsToQuiz = dueWords.slice(0, count).map((p: WordProgress) => p.wordId);
     
-    return words.filter(word => wordIdsToQuiz.includes(word.id));
+    const selectedWords = words.filter(word => wordIdsToQuiz.includes(word.id));
+    
+    // Fisher-Yates Shuffle implementation
+    const shuffled = [...selectedWords];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    
+    return shuffled;
   }, [words, progress]);
   
   const updateWordProgress = useCallback((wordId: string, correct: boolean) => {
