@@ -77,6 +77,13 @@ const Quiz: React.FC = () => {
     handleNext();
   };
 
+  const playAudio = () => {
+      if (!currentWord) return;
+      const utterance = new SpeechSynthesisUtterance(currentWord.hungarian);
+      utterance.lang = 'hu-HU';
+      window.speechSynthesis.speak(utterance);
+  };
+
   if (quizWords.length === 0) {
     return (
       <div className="flex-grow flex flex-col justify-center items-center text-center p-4">
@@ -108,7 +115,10 @@ const Quiz: React.FC = () => {
                     <p className="text-slate-500 mb-2">{quizMode === QuizMode.HuToJp ? 'Hungarian' : 'Japanese'}</p>
                     <h2 className="text-4xl md:text-5xl font-bold text-slate-800">{question}</h2>
                     {quizMode === QuizMode.HuToJp && (
-                        <button className="mt-2 text-slate-400 hover:text-blue-600 transition-colors">
+                        <button 
+                            onClick={playAudio}
+                            className="mt-2 text-slate-400 hover:text-blue-600 transition-colors"
+                        >
                             <Volume2 size={24} />
                         </button>
                     )}
