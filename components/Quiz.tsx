@@ -162,7 +162,7 @@ const Quiz: React.FC = () => {
                 {currentWord.example && currentItem.type === 'with_example' && (
                   <div className="mt-6 p-4 bg-slate-50 rounded-lg max-w-md w-full text-center mx-auto">
                     <p className="text-lg font-medium text-slate-700 mb-1">{currentWord.example.sentence}</p>
-                    <p className="text-sm text-slate-500">{currentWord.example.translation}</p>
+                    {selectedOption && <p className="text-sm text-slate-500">{currentWord.example.translation}</p>}
                   </div>
                 )}
             </div>
