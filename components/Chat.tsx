@@ -40,12 +40,13 @@ const Chat: React.FC = () => {
     setMessages(prev => prev.map(msg => msg.id === userMessage.id ? {...msg, correction} : msg));
 
     const correctedSentence = correction.isCorrect ? userInput : (correction.correctedSentence || userInput);
-    const aiResponseText = await getChatResponse(messages, correctedSentence);
+    const { text: aiResponseText, translation } = await getChatResponse(messages, correctedSentence);
 
     const aiMessage: ChatMessage = {
       id: `model-${Date.now()}`,
       role: 'model',
       text: aiResponseText,
+      translation: translation,
       timestamp: Date.now(),
     };
 
@@ -116,6 +117,11 @@ const Chat: React.FC = () => {
                  : message.text
                 }
               </p>
+              {message.role === 'model' && message.translation && (
+                  <p className="mt-2 text-sm text-slate-500 border-t border-slate-300 pt-1">
+                      {message.translation}
+                  </p>
+              )}
               {message.role === 'user' && message.correction && (
                 <div className={`mt-2 p-2 rounded-lg text-sm ${message.correction.isCorrect ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
                   {message.correction.isCorrect ? (

@@ -24,7 +24,8 @@ function getChatInstance(): Chat {
     chatInstance = ai.chats.create({
       model: 'gemini-2.5-flash',
       config: {
-        systemInstruction: "You are a friendly and patient Hungarian language tutor named Tenju. Your replies should be in Hungarian. Keep your sentences relatively simple for a beginner-to-intermediate learner. Do not use markdown.",
+        systemInstruction: "You are a friendly and patient Hungarian language tutor named Tenju. Your replies must be in JSON format with two keys: 'hungarian' (your reply in Hungarian) and 'japanese' (the Japanese translation of your reply). Keep your sentences relatively simple for a beginner-to-intermediate learner. Do not use markdown in the content.",
+        responseMimeType: "application/json",
       },
     });
   }
@@ -32,14 +33,37 @@ function getChatInstance(): Chat {
 }
 
 
-export async function getChatResponse(history: ChatMessage[], newMessage: string): Promise<string> {
+export async function getChatResponse(history: ChatMessage[], newMessage: string): Promise<{ text: string, translation: string }> {
   const chat = getChatInstance();
   try {
     const response: GenerateContentResponse = await chat.sendMessage({ message: newMessage });
-    return response.text ?? "Sajnálom, nem értem. (Sorry, I don't understand.)";
+    // @ts-ignore - The SDK types might be confusing vs runtime behavior or I am misinterpreting, but relying on previous 'response.text' property usage.
+    // Actually, based on lint error "Type 'String' has no call signatures", response.text is a string/String property.
+    const responseText = response.text; 
+    if (!responseText) {
+      throw new Error("Empty response");
+    }
+    
+    try {
+        const parsed = JSON.parse(responseText);
+        return {
+            text: parsed.hungarian,
+            translation: parsed.japanese
+        };
+    } catch (e) {
+        console.error("Failed to parse JSON response", e);
+        // Fallback if strict JSON fails, though with responseMimeType it should be fine
+        return {
+            text: responseText,
+            translation: ""
+        };
+    }
   } catch (error) {
     console.error("Error getting chat response:", error);
-    return "Hiba történt a válasszal. (An error occurred with the response.)";
+    return {
+        text: "Hiba történt a válasszal. (An error occurred with the response.)",
+        translation: "応答でエラーが発生しました。"
+    };
   }
 }
 

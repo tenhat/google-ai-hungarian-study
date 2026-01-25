@@ -43,6 +43,7 @@ export interface ChatMessage {
   id: string;
   role: 'user' | 'model';
   text: string;
+  translation?: string;
   correction?: Correction;
   timestamp: number;
 }
