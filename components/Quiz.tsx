@@ -4,21 +4,54 @@ import { Word, QuizMode } from '../types';
 import { ArrowRight, Volume2, Check, X, CheckCircle } from 'lucide-react';
 
 const Quiz: React.FC = () => {
-  const { words, getWordsForQuiz, updateWordProgress, getWordById, progress, markAsMastered } = useWordBank();
-  const [quizWords, setQuizWords] = useState<Word[]>([]);
+  const { words, getWordsForQuiz, updateWordProgress, getWordById, progress, markAsMastered, loading } = useWordBank();
+  
+  interface QuizItem {
+    word: Word;
+    type: 'word_only' | 'with_example';
+  }
+
+  const [quizItems, setQuizItems] = useState<QuizItem[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [options, setOptions] = useState<string[]>([]);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [quizMode, setQuizMode] = useState<QuizMode>(QuizMode.HuToJp);
 
-  const currentWord = useMemo(() => quizWords[currentIndex], [quizWords, currentIndex]);
+  const currentItem = useMemo(() => quizItems[currentIndex], [quizItems, currentIndex]);
+  const currentWord = useMemo(() => currentItem?.word, [currentItem]);
 
   useEffect(() => {
     // Only load quiz words if we don't have them yet and words are loaded
-    if (quizWords.length === 0 && words.length > 0) {
+    if (quizItems.length === 0 && words.length > 0) {
       const dueWords = getWordsForQuiz(10);
-      setQuizWords(dueWords);
+      
+      // Generate Quiz Items
+      const newQuizItems: QuizItem[] = [];
+      
+      for (const word of dueWords) {
+          // 1. Add item with example (if exists)
+          if (word.example) {
+              const exampleItem: QuizItem = { word, type: 'with_example' };
+              // Insert at random position
+              const indexA = Math.floor(Math.random() * (newQuizItems.length + 1));
+              newQuizItems.splice(indexA, 0, exampleItem);
+              
+              // 2. Add word-only item (must be after example item)
+              const wordItem: QuizItem = { word, type: 'word_only' };
+              // Random position between indexA + 1 and end
+              const minIndexB = indexA + 1;
+              const indexB = Math.floor(Math.random() * (newQuizItems.length - minIndexB + 1)) + minIndexB;
+              newQuizItems.splice(indexB, 0, wordItem);
+          } else {
+              // No example, just add word item at random position
+              const wordItem: QuizItem = { word, type: 'word_only' };
+              const index = Math.floor(Math.random() * (newQuizItems.length + 1));
+              newQuizItems.splice(index, 0, wordItem);
+          }
+      }
+
+      setQuizItems(newQuizItems);
       setCurrentIndex(0);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -26,8 +59,7 @@ const Quiz: React.FC = () => {
 
   useEffect(() => {
     if (currentWord) {
-      // Determine quiz mode and generate options for the new word in one go
-      // to ensure consistency and prevent state changes on re-renders for the same question.
+      // Determine quiz mode
       const newQuizMode = QuizMode.HuToJp;
       setQuizMode(newQuizMode);
 
@@ -45,12 +77,11 @@ const Quiz: React.FC = () => {
   const handleNext = () => {
     setSelectedOption(null);
     setIsCorrect(null);
-    if(currentIndex < quizWords.length - 1) {
+    if(currentIndex < quizItems.length - 1) {
         setCurrentIndex(prev => prev + 1);
     } else {
-        // Quiz finished, reshuffle
-        const dueWords = getWordsForQuiz(10);
-        setQuizWords(dueWords);
+        // Quiz finished, reload new set
+        setQuizItems([]);
         setCurrentIndex(0);
     }
   };
@@ -84,7 +115,11 @@ const Quiz: React.FC = () => {
       window.speechSynthesis.speak(utterance);
   };
 
-  if (quizWords.length === 0) {
+  if (loading || (quizItems.length === 0 && words.length > 0)) {
+     // Show loading or empty state if needed
+  }
+
+  if (quizItems.length === 0) {
     return (
       <div className="flex-grow flex flex-col justify-center items-center text-center p-4">
         <div className="bg-white p-8 rounded-xl shadow-lg">
@@ -95,7 +130,7 @@ const Quiz: React.FC = () => {
     );
   }
 
-  if (!currentWord) return null;
+  if (!currentItem) return null;
 
   const question = quizMode === QuizMode.HuToJp ? currentWord.hungarian : currentWord.japanese;
   const correctAnswer = quizMode === QuizMode.HuToJp ? currentWord.japanese : currentWord.hungarian;
@@ -108,7 +143,7 @@ const Quiz: React.FC = () => {
         <div className="w-full max-w-2xl mx-auto space-y-6">
             <div className="relative p-4 rounded-lg bg-white shadow-md">
                 <div className="absolute top-2 right-2 text-xs text-slate-400 font-semibold">
-                    {currentIndex + 1} / {quizWords.length}
+                    {currentIndex + 1} / {quizItems.length}
                 </div>
                  {wordContext && <div className="text-sm text-blue-500 font-semibold mb-4">{wordContext}</div>}
                 <div className="text-center">
@@ -123,7 +158,8 @@ const Quiz: React.FC = () => {
                         </button>
                     )}
                 </div>
-                {currentWord.example && (
+                {/* Only show example if word has one AND current item type is 'with_example' */}
+                {currentWord.example && currentItem.type === 'with_example' && (
                   <div className="mt-6 p-4 bg-slate-50 rounded-lg max-w-md w-full text-center mx-auto">
                     <p className="text-lg font-medium text-slate-700 mb-1">{currentWord.example.sentence}</p>
                     <p className="text-sm text-slate-500">{currentWord.example.translation}</p>
