@@ -110,9 +110,35 @@ const Quiz: React.FC = () => {
 
   const playAudio = () => {
       if (!currentWord) return;
-      const utterance = new SpeechSynthesisUtterance(currentWord.hungarian);
-      utterance.lang = 'hu-HU';
-      window.speechSynthesis.speak(utterance);
+
+      const speak = () => {
+          const utterance = new SpeechSynthesisUtterance(currentWord.hungarian);
+          utterance.lang = 'hu-HU';
+          
+          // Explicitly find and set Hungarian voice
+          const voices = window.speechSynthesis.getVoices();
+          // Try exact match first, then prefix match
+          const huVoice = voices.find(v => v.lang === 'hu-HU' || v.lang === 'hu_HU') || 
+                          voices.find(v => v.lang.startsWith('hu'));
+                          
+          if (huVoice) {
+              utterance.voice = huVoice;
+          } else {
+              console.warn("Hungarian voice not found in available voices:", voices.map(v => v.lang));
+          }
+
+          window.speechSynthesis.speak(utterance);
+      };
+
+      // Chrome/iOS requires handling async voice loading
+      if (window.speechSynthesis.getVoices().length === 0) {
+          window.speechSynthesis.onvoiceschanged = () => {
+              speak();
+              window.speechSynthesis.onvoiceschanged = null;
+          };
+      } else {
+          speak();
+      }
   };
 
   if (loading || (quizItems.length === 0 && words.length > 0)) {
