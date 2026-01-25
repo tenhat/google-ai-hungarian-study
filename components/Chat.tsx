@@ -9,6 +9,7 @@ const Chat: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [userInput, setUserInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isHistoryLoaded, setIsHistoryLoaded] = useState(false);
   const { addNewWord } = useWordBank();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -20,8 +21,30 @@ const Chat: React.FC = () => {
     scrollToBottom();
   }, [messages]);
 
+  // Load History
+  useEffect(() => {
+    const saved = localStorage.getItem('hungarian-study-tenju-chat-history');
+    if (saved) {
+        try {
+            setMessages(JSON.parse(saved));
+        } catch (e) {
+            console.error("Failed to parse chat history", e);
+        }
+    }
+    setIsHistoryLoaded(true);
+  }, []);
+
+  // Save History
+  useEffect(() => {
+    if (isHistoryLoaded) {
+        localStorage.setItem('hungarian-study-tenju-chat-history', JSON.stringify(messages));
+    }
+  }, [messages, isHistoryLoaded]);
+
   // Daily Question
   useEffect(() => {
+    if (!isHistoryLoaded) return;
+
     let mounted = true;
     const fetchDailyQuestion = async () => {
         if (messages.length === 0) {
@@ -47,7 +70,7 @@ const Chat: React.FC = () => {
     };
     fetchDailyQuestion();
     return () => { mounted = false; };
-  }, []); // Run once on mount
+  }, [isHistoryLoaded]); // Only run when history load completes (messages dep removed to avoid loops, intentionally running once per load)
   
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
