@@ -2,7 +2,7 @@
 import { GoogleGenAI, Chat, GenerateContentResponse, Type } from "@google/genai";
 import { ChatMessage, Correction } from "../types";
 
-const getApiKey = () => process.env.GEMINI_API_KEY || process.env.API_KEY;
+const getApiKey = () => import.meta.env.VITE_GEMINI_API_KEY || (typeof process !== 'undefined' ? process.env.GEMINI_API_KEY : undefined);
 
 let aiInstance: GoogleGenAI | null = null;
 function getAiInstance(): GoogleGenAI {
