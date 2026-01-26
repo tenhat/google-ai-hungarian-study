@@ -94,12 +94,6 @@ const Quiz: React.FC = () => {
     const wasCorrect = option === correctAnswer;
     setIsCorrect(wasCorrect);
     updateWordProgress(currentWord.id, wasCorrect);
-
-    if (wasCorrect) {
-        setTimeout(() => {
-            handleNext();
-        }, 1500);
-    }
   };
 
   const handleMastered = () => {
@@ -231,11 +225,9 @@ const Quiz: React.FC = () => {
                             {!isCorrect && <p className="text-red-700">Correct answer: {correctAnswer}</p>}
                         </div>
                     </div>
-                    {!isCorrect && (
-                        <button onClick={handleNext} className="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg shadow hover:bg-blue-700 transition-colors flex items-center gap-2">
-                            Next <ArrowRight size={20} />
-                        </button>
-                    )}
+                    <button onClick={handleNext} className="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg shadow hover:bg-blue-700 transition-colors flex items-center gap-2">
+                        Next <ArrowRight size={20} />
+                    </button>
                 </div>
             )}
         </div>
