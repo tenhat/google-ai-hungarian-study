@@ -98,7 +98,7 @@ const Quiz: React.FC = () => {
     if (wasCorrect) {
         setTimeout(() => {
             handleNext();
-        }, 500);
+        }, 1500);
     }
   };
 
