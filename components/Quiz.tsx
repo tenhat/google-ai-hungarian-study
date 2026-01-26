@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useWordBank } from '../hooks/useWordBank';
 import { Word, QuizMode } from '../types';
-import { ArrowRight, Volume2, Check, X, CheckCircle } from 'lucide-react';
+import { ArrowRight, Volume2, Check, X, CheckCircle, HelpCircle } from 'lucide-react';
 
 const Quiz: React.FC = () => {
   const { words, getWordsForQuiz, updateWordProgress, getWordById, progress, markAsMastered, loading } = useWordBank();
@@ -100,6 +100,15 @@ const Quiz: React.FC = () => {
     if (selectedOption) return; // Prevent if already answered
     markAsMastered(currentWord.id);
     handleNext();
+  };
+
+  const handleGiveUp = () => {
+    if (selectedOption) return;
+    
+    // Mark as incorrect
+    setSelectedOption('__GIVE_UP__'); // Special value to indicate give up
+    setIsCorrect(false);
+    updateWordProgress(currentWord.id, false);
   };
 
   const playAudio = () => {
@@ -215,6 +224,18 @@ const Quiz: React.FC = () => {
                     </button>
                 ))}
             </div>
+
+            {!selectedOption && (
+                <div className="flex justify-center mt-4">
+                    <button 
+                        onClick={handleGiveUp}
+                        className="flex items-center gap-2 text-slate-500 hover:text-slate-700 font-medium px-4 py-2 rounded-lg hover:bg-slate-100 transition-colors"
+                    >
+                        <HelpCircle size={20} />
+                        <span>I don't know</span>
+                    </button>
+                </div>
+            )}
 
             {selectedOption && (
                 <div className={`p-4 rounded-lg flex items-center justify-between ${isCorrect ? 'bg-green-100' : 'bg-red-100'}`}>
