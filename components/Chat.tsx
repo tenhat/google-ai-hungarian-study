@@ -113,23 +113,78 @@ const Chat: React.FC = () => {
   };
 
   // 画像選択処理
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // ファイルサイズチェック (5MB制限)
-    if (file.size > 5 * 1024 * 1024) {
-      alert('画像サイズが大きすぎます。5MB以下の画像を選択してください。');
+    // ファイルサイズチェック (10MB制限 - リサイズ前)
+    if (file.size > 10 * 1024 * 1024) {
+      alert('画像サイズが大きすぎます。10MB以下の画像を選択してください。');
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const dataUrl = event.target?.result as string;
-      setSelectedImage(dataUrl);
-      setImageMimeType(file.type);
-    };
-    reader.readAsDataURL(file);
+    try {
+      // 画像をリサイズ・圧縮してbase64に変換
+      const resizedDataUrl = await resizeImage(file, 800, 0.7);
+      setSelectedImage(resizedDataUrl);
+      setImageMimeType('image/jpeg'); // リサイズ後は常にJPEG
+    } catch (error) {
+      console.error('Error resizing image:', error);
+      alert('画像の処理に失敗しました。別の画像をお試しください。');
+    }
+  };
+
+  // 画像リサイズ・圧縮関数
+  const resizeImage = (file: File, maxSize: number, quality: number): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        try {
+          // アスペクト比を維持してリサイズ
+          let width = img.width;
+          let height = img.height;
+          
+          if (width > height) {
+            if (width > maxSize) {
+              height = Math.round((height * maxSize) / width);
+              width = maxSize;
+            }
+          } else {
+            if (height > maxSize) {
+              width = Math.round((width * maxSize) / height);
+              height = maxSize;
+            }
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            reject(new Error('Failed to get canvas context'));
+            return;
+          }
+          
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          // JPEG形式で圧縮してbase64に変換
+          const dataUrl = canvas.toDataURL('image/jpeg', quality);
+          resolve(dataUrl);
+        } catch (error) {
+          reject(error);
+        }
+      };
+      img.onerror = () => reject(new Error('Failed to load image'));
+      
+      // FileReaderで画像を読み込み
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        img.src = e.target?.result as string;
+      };
+      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.readAsDataURL(file);
+    });
   };
 
   // 画像送信処理
@@ -138,6 +193,8 @@ const Chat: React.FC = () => {
 
     // base64データ部分を抽出（data:image/jpeg;base64, を除去）
     const base64Data = selectedImage.split(',')[1];
+    // MIMEタイプをローカル変数に保持（ステートクリア前に取得）
+    const mimeType = imageMimeType || 'image/jpeg';
     
     const userMessage: ChatMessage = {
       id: `user-img-${Date.now()}`,
@@ -153,7 +210,8 @@ const Chat: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const { text: aiResponseText, translation, segments } = await getImageChatResponse(base64Data, imageMimeType);
+      // ローカル変数のmimeTypeを使用
+      const { text: aiResponseText, translation, segments } = await getImageChatResponse(base64Data, mimeType);
 
       const aiMessage: ChatMessage = {
         id: `model-img-${Date.now()}`,
