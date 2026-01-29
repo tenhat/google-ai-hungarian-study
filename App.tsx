@@ -13,10 +13,12 @@ import { AuthProvider } from './contexts/AuthContext';
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<View>(View.Home);
 
-  // ビュー切り替え時に画面上部にスクロール
+  // ビュー切り替え時に画面上部にスクロール（iOS Safari対応）
   const handleViewChange = (view: View) => {
     setCurrentView(view);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
   };
 
   const renderView = () => {

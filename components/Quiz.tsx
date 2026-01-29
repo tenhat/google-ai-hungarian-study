@@ -84,8 +84,10 @@ const Quiz: React.FC = () => {
         setQuizItems([]);
         setCurrentIndex(0);
     }
-    // 画面を一番上にスクロール
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // 画面を一番上にスクロール（iOS Safari対応）
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
   };
 
   const handleAnswer = (option: string) => {
@@ -111,8 +113,10 @@ const Quiz: React.FC = () => {
     setSelectedOption('__GIVE_UP__'); // Special value to indicate give up
     setIsCorrect(false);
     updateWordProgress(currentWord.id, false);
-    // 画面を一番上にスクロール
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // 画面を一番上にスクロール（iOS Safari対応）
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
   };
 
   const playAudio = () => {
