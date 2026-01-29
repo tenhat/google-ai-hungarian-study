@@ -3,10 +3,11 @@ import React, { useState } from 'react';
 import Home from './components/Home';
 import Quiz from './components/Quiz';
 import Chat from './components/Chat';
+import Translate from './components/Translate';
 import { WordBankProvider } from './hooks/useWordBank';
 import { View } from './types';
 import Header from './components/shared/Header';
-import { BrainCircuit, MessageSquare, HomeIcon } from 'lucide-react';
+import { BrainCircuit, MessageSquare, HomeIcon, Languages } from 'lucide-react';
 
 import { AuthProvider } from './contexts/AuthContext';
 
@@ -27,6 +28,8 @@ const App: React.FC = () => {
         return <Quiz />;
       case View.Chat:
         return <Chat />;
+      case View.Translate:
+        return <Translate />;
       case View.Home:
       default:
         return <Home setCurrentView={handleViewChange} />;
@@ -56,6 +59,13 @@ const App: React.FC = () => {
             >
               <BrainCircuit size={24} />
               <span className="text-xs font-medium">Quiz</span>
+            </button>
+            <button
+              onClick={() => handleViewChange(View.Translate)}
+              className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-colors ${currentView === View.Translate ? 'text-blue-600' : 'text-slate-500 hover:bg-slate-100'}`}
+            >
+              <Languages size={24} />
+              <span className="text-xs font-medium">翻訳</span>
             </button>
             <button
               onClick={() => handleViewChange(View.Chat)}

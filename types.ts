@@ -32,6 +32,7 @@ export enum View {
   Home = 'Home',
   Quiz = 'Quiz',
   Chat = 'Chat',
+  Translate = 'Translate',
 }
 
 export enum QuizMode {
@@ -54,4 +55,17 @@ export interface Correction {
   isCorrect: boolean;
   correctedSentence?: string;
   explanation?: string;
+}
+
+export interface TranslationResult {
+  hungarian: string;           // ハンガリー語翻訳
+  explanation: string;         // 活用・文法解説
+  importantWords: {
+    hungarian: string;
+    japanese: string;
+    example: {
+      sentence: string;
+      translation: string;
+    };
+  }[];
 }

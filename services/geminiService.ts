@@ -1,6 +1,6 @@
 
 import { GoogleGenAI, Chat, GenerateContentResponse, Type } from "@google/genai";
-import { ChatMessage, Correction } from "../types";
+import { ChatMessage, Correction, TranslationResult } from "../types";
 
 const getApiKey = () => import.meta.env.VITE_GEMINI_API_KEY || (typeof process !== 'undefined' ? process.env.GEMINI_API_KEY : undefined);
 
@@ -233,3 +233,64 @@ Use vocabulary appropriate for a beginner-to-intermediate learner. Do not use ma
     }
 }
 
+/**
+ * 日本語テキストをハンガリー語に翻訳し、活用解説と重要単語を返す
+ * @param japaneseText - 翻訳する日本語テキスト
+ */
+export async function getTranslation(japaneseText: string): Promise<TranslationResult> {
+    const prompt = `You are a Hungarian language expert. Translate the following Japanese text into Hungarian and provide a detailed explanation.
+
+Japanese text: "${japaneseText}"
+
+Return a JSON object with the following structure:
+{
+  "hungarian": "The Hungarian translation of the text",
+  "explanation": "A detailed explanation in Japanese about the grammar, verb conjugations, and sentence structure used in the translation. Include how verbs are conjugated, case endings used, and any important grammatical points.",
+  "importantWords": [
+    {
+      "hungarian": "word1",
+      "japanese": "meaning1",
+      "example": {
+        "sentence": "Example sentence using the word",
+        "translation": "日本語訳"
+      }
+    }
+  ]
+}
+
+Important notes:
+- The explanation should be in Japanese and be educational for learners
+- Include 3-5 important words that appear in the translation or are related to it
+- Each important word should have a realistic example sentence
+- Do not use markdown formatting`;
+
+    try {
+        const ai = getAiInstance();
+        const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: prompt,
+            config: {
+                responseMimeType: "application/json",
+            }
+        });
+
+        const responseText = response.text;
+        if (!responseText) {
+            throw new Error("Empty response from translation");
+        }
+
+        const parsed = JSON.parse(responseText);
+        return {
+            hungarian: parsed.hungarian || "",
+            explanation: parsed.explanation || "",
+            importantWords: parsed.importantWords || []
+        };
+    } catch (error) {
+        console.error("Error getting translation:", error);
+        return {
+            hungarian: "Fordítási hiba történt.",
+            explanation: "翻訳中にエラーが発生しました。もう一度お試しください。",
+            importantWords: []
+        };
+    }
+}
