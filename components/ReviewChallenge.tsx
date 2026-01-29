@@ -1,7 +1,16 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useWordBank } from '../hooks/useWordBank';
 import { Word } from '../types';
-import { Trophy, RefreshCw, Volume2, ArrowRight, CheckCircle2, XCircle, Target } from 'lucide-react';
+import { Trophy, RefreshCw, Volume2, ArrowRight, CheckCircle2, XCircle, Target, Play } from 'lucide-react';
+
+const STORAGE_KEY = 'review-challenge-progress';
+
+interface ChallengeProgress {
+  wordIds: string[];
+  currentIndex: number;
+  correctCount: number;
+  incorrectCount: number;
+}
 
 const ReviewChallenge: React.FC = () => {
   const { words, getWordsForReviewChallenge, resetWordProgress, getStats } = useWordBank();
@@ -13,9 +22,44 @@ const ReviewChallenge: React.FC = () => {
   const [incorrectCount, setIncorrectCount] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
+  const [savedProgress, setSavedProgress] = useState<ChallengeProgress | null>(null);
 
   const stats = getStats();
   const currentWord = quizWords[currentIndex];
+
+  // 保存された進捗を読み込む
+  useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try {
+        const progress: ChallengeProgress = JSON.parse(saved);
+        setSavedProgress(progress);
+      } catch {
+        localStorage.removeItem(STORAGE_KEY);
+      }
+    }
+  }, []);
+
+  // 進捗を保存する
+  useEffect(() => {
+    if (hasStarted && !isFinished && quizWords.length > 0) {
+      const progress: ChallengeProgress = {
+        wordIds: quizWords.map(w => w.id),
+        currentIndex,
+        correctCount,
+        incorrectCount,
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+    }
+  }, [hasStarted, isFinished, quizWords, currentIndex, correctCount, incorrectCount]);
+
+  // 完了時に進捗を削除
+  useEffect(() => {
+    if (isFinished) {
+      localStorage.removeItem(STORAGE_KEY);
+      setSavedProgress(null);
+    }
+  }, [isFinished]);
 
   // 4択の選択肢を生成
   const options = useMemo(() => {
@@ -31,7 +75,33 @@ const ReviewChallenge: React.FC = () => {
     return [...wrongAnswers, correctAnswer].sort(() => Math.random() - 0.5);
   }, [currentWord, words, quizWords.length]);
 
+  // 保存された進捗から再開
+  const resumeChallenge = () => {
+    if (!savedProgress) return;
+    
+    const resumedWords = savedProgress.wordIds
+      .map(id => words.find(w => w.id === id))
+      .filter((w): w is Word => w !== undefined);
+    
+    if (resumedWords.length === 0) {
+      localStorage.removeItem(STORAGE_KEY);
+      setSavedProgress(null);
+      return;
+    }
+
+    setQuizWords(resumedWords);
+    setCurrentIndex(savedProgress.currentIndex);
+    setCorrectCount(savedProgress.correctCount);
+    setIncorrectCount(savedProgress.incorrectCount);
+    setSelectedOption(null);
+    setIsCorrect(null);
+    setIsFinished(false);
+    setHasStarted(true);
+  };
+
   const startChallenge = () => {
+    localStorage.removeItem(STORAGE_KEY);
+    setSavedProgress(null);
     const challengeWords = getWordsForReviewChallenge();
     setQuizWords(challengeWords);
     setCurrentIndex(0);
@@ -97,13 +167,24 @@ const ReviewChallenge: React.FC = () => {
         {stats.learningCount === 0 ? (
           <p className="text-slate-500">学習中の単語がありません。まず通常Quizで単語を学習してください。</p>
         ) : (
-          <button
-            onClick={startChallenge}
-            className="bg-orange-500 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:bg-orange-600 transition-colors flex items-center gap-2"
-          >
-            <Target size={20} />
-            チャレンジ開始
-          </button>
+          <div className="flex flex-col gap-3">
+            {savedProgress && (
+              <button
+                onClick={resumeChallenge}
+                className="bg-orange-500 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:bg-orange-600 transition-colors flex items-center gap-2"
+              >
+                <Play size={20} />
+                続きから再開（{savedProgress.currentIndex + 1}/{savedProgress.wordIds.length}）
+              </button>
+            )}
+            <button
+              onClick={startChallenge}
+              className={`${savedProgress ? 'bg-slate-200 text-slate-700 hover:bg-slate-300' : 'bg-orange-500 text-white hover:bg-orange-600'} font-bold py-3 px-8 rounded-full shadow-lg transition-colors flex items-center gap-2`}
+            >
+              <Target size={20} />
+              {savedProgress ? '最初から始める' : 'チャレンジ開始'}
+            </button>
+          </div>
         )}
       </div>
     );
