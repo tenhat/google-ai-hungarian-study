@@ -33,6 +33,7 @@ export enum View {
   Quiz = 'Quiz',
   Chat = 'Chat',
   Translate = 'Translate',
+  ReviewChallenge = 'ReviewChallenge',
 }
 
 export enum QuizMode {

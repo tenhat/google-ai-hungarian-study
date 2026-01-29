@@ -1,13 +1,13 @@
-
 import React, { useState } from 'react';
 import Home from './components/Home';
 import Quiz from './components/Quiz';
 import Chat from './components/Chat';
 import Translate from './components/Translate';
+import ReviewChallenge from './components/ReviewChallenge';
 import { WordBankProvider } from './hooks/useWordBank';
 import { View } from './types';
 import Header from './components/shared/Header';
-import { BrainCircuit, MessageSquare, HomeIcon, Languages } from 'lucide-react';
+import { BrainCircuit, MessageSquare, HomeIcon, Languages, Target } from 'lucide-react';
 
 import { AuthProvider } from './contexts/AuthContext';
 
@@ -30,6 +30,8 @@ const App: React.FC = () => {
         return <Chat />;
       case View.Translate:
         return <Translate />;
+      case View.ReviewChallenge:
+        return <ReviewChallenge />;
       case View.Home:
       default:
         return <Home setCurrentView={handleViewChange} />;
@@ -59,6 +61,13 @@ const App: React.FC = () => {
             >
               <BrainCircuit size={24} />
               <span className="text-xs font-medium">Quiz</span>
+            </button>
+            <button
+              onClick={() => handleViewChange(View.ReviewChallenge)}
+              className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-colors ${currentView === View.ReviewChallenge ? 'text-orange-500' : 'text-slate-500 hover:bg-slate-100'}`}
+            >
+              <Target size={24} />
+              <span className="text-xs font-medium">復習</span>
             </button>
             <button
               onClick={() => handleViewChange(View.Translate)}

@@ -7,7 +7,9 @@ interface WordBankContextType {
   progress: Map<string, WordProgress>;
   getWordById: (id: string) => Word | undefined;
   getWordsForQuiz: (count: number) => Word[];
+  getWordsForReviewChallenge: () => Word[];
   updateWordProgress: (wordId: string, correct: boolean) => void;
+  resetWordProgress: (wordId: string) => void;
   addNewWord: (hungarian: string, japanese: string, example?: { sentence: string, translation: string }) => void;
   getStats: () => { newCount: number, learningCount: number, masteredCount: number };
   loading: boolean;
@@ -257,6 +259,45 @@ export const WordBankProvider: React.FC<{ children: ReactNode }> = ({ children }
     
     return shuffled;
   }, [words, progress]);
+
+  // 復習チャレンジ: Learning単語を全て取得
+  const getWordsForReviewChallenge = useCallback((): Word[] => {
+    const learningWordIds = Array.from(progress.values())
+      .filter((p: WordProgress) => p.status === WordStatus.Learning)
+      .map((p: WordProgress) => p.wordId);
+    
+    const selectedWords = words.filter(word => learningWordIds.includes(word.id));
+    
+    // Fisher-Yates Shuffle
+    const shuffled = [...selectedWords];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    
+    return shuffled;
+  }, [words, progress]);
+
+  // 単語の進捗をリセット（復習チャレンジで不正解時）
+  const resetWordProgress = useCallback((wordId: string) => {
+    const currentProgress = progress.get(wordId);
+    if (!currentProgress) return;
+    const currentWord = words.find(w => w.id === wordId);
+    if (!currentWord) return;
+
+    const newProgress = { ...currentProgress };
+    newProgress.lastCorrect = false;
+    newProgress.repetitions = 0;
+    newProgress.interval = 0;
+    newProgress.nextReviewDate = new Date().toISOString(); // 今日に設定
+
+    setProgress(new Map(progress.set(wordId, newProgress)));
+    
+    if (user) {
+        syncToFirestore(currentWord, newProgress);
+    }
+  }, [progress, words, user]);
+
   
   const updateWordProgress = useCallback((wordId: string, correct: boolean) => {
     const currentProgress = progress.get(wordId);
@@ -360,7 +401,7 @@ export const WordBankProvider: React.FC<{ children: ReactNode }> = ({ children }
     }
   }, [progress, words, user]);
 
-  const contextValue = { words, progress, getWordById, getWordsForQuiz, updateWordProgress, addNewWord, getStats, loading, markAsMastered };
+  const contextValue = { words, progress, getWordById, getWordsForQuiz, getWordsForReviewChallenge, updateWordProgress, resetWordProgress, addNewWord, getStats, loading, markAsMastered };
   return React.createElement(WordBankContext.Provider, { value: contextValue }, children);
 };
 
