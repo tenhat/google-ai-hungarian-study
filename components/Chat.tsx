@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { getChatResponse, getGrammarCorrection, getWordTranslation, getDailyQuestion, getImageChatResponse } from '../services/geminiService';
 import { ChatMessage } from '../types';
-import { Send, CheckCircle, AlertCircle, Sparkles, Loader2, Camera, X } from 'lucide-react';
+import { Send, CheckCircle, AlertCircle, Sparkles, Loader2, Camera, X, Trash2 } from 'lucide-react';
 import { useWordBank } from '../hooks/useWordBank';
 
 const Chat: React.FC = () => {
@@ -188,6 +188,14 @@ const Chat: React.FC = () => {
       fileInputRef.current.value = '';
     }
   };
+
+  // チャット履歴を初期化
+  const handleClearHistory = () => {
+    if (window.confirm('チャット履歴を削除しますか？この操作は取り消せません。')) {
+      setMessages([]);
+      localStorage.removeItem('hungarian-study-tenju-chat-history');
+    }
+  };
   
   /* モーダル用State */
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -266,6 +274,17 @@ const Chat: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full max-h-[80vh] bg-white rounded-xl shadow-lg border border-slate-200 relative">
+      {/* ヘッダーバー */}
+      <div className="flex items-center justify-between px-4 py-2 border-b border-slate-200">
+        <h2 className="text-sm font-medium text-slate-600">AIチャット</h2>
+        <button
+          onClick={handleClearHistory}
+          className="text-slate-400 hover:text-red-500 p-1 rounded transition-colors"
+          title="履歴を削除"
+        >
+          <Trash2 size={18} />
+        </button>
+      </div>
       <div className="flex-grow p-4 overflow-y-auto space-y-4">
         {messages.map((message) => (
           <div key={message.id} className={`flex items-end gap-2 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
