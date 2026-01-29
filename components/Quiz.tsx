@@ -84,6 +84,8 @@ const Quiz: React.FC = () => {
         setQuizItems([]);
         setCurrentIndex(0);
     }
+    // 画面を一番上にスクロール
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleAnswer = (option: string) => {
