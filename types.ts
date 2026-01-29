@@ -43,6 +43,7 @@ export interface ChatMessage {
   id: string;
   role: 'user' | 'model';
   text: string;
+  imageUrl?: string;  // base64 data URL形式で画像を保存
   translation?: string;
   segments?: { hungarian: string; japanese: string; }[];
   correction?: Correction;

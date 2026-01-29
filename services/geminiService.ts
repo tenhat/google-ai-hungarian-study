@@ -160,3 +160,76 @@ export async function getDailyQuestion(): Promise<{ text: string, translation: s
         return { text: "Szia! Mit csinálsz?", translation: "こんにちは！何をしていますか？" };
     }
 }
+
+/**
+ * 画像を解析し、ハンガリー語で内容を説明+関連した質問を生成する
+ * @param imageBase64 - base64エンコードされた画像データ（data:image/...プレフィックスなし）
+ * @param mimeType - 画像のMIMEタイプ（例: "image/jpeg", "image/png"）
+ */
+export async function getImageChatResponse(
+    imageBase64: string,
+    mimeType: string
+): Promise<{ text: string, translation: string, segments?: { hungarian: string, japanese: string }[] }> {
+    const systemPrompt = `You are a friendly Hungarian language tutor named Tenju. 
+Look at the image provided and do TWO things:
+1. Describe what you see in the image in Hungarian (2-3 sentences)
+2. Ask the learner a simple question in Hungarian about the image
+
+Your reply must be in JSON format with three keys:
+- 'hungarian': your full reply in Hungarian (description + question)
+- 'japanese': the full Japanese translation
+- 'segments': an array of objects, each containing 'hungarian' and 'japanese' keys representing corresponding sentence pairs
+
+Use vocabulary appropriate for a beginner-to-intermediate learner. Do not use markdown.`;
+
+    try {
+        const ai = getAiInstance();
+        const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: [
+                {
+                    role: "user",
+                    parts: [
+                        { text: systemPrompt },
+                        {
+                            inlineData: {
+                                mimeType: mimeType,
+                                data: imageBase64
+                            }
+                        }
+                    ]
+                }
+            ],
+            config: {
+                responseMimeType: "application/json",
+            }
+        });
+
+        const responseText = response.text;
+        if (!responseText) {
+            throw new Error("Empty response from image analysis");
+        }
+
+        try {
+            const parsed = JSON.parse(responseText);
+            return {
+                text: parsed.hungarian,
+                translation: parsed.japanese,
+                segments: parsed.segments
+            };
+        } catch (e) {
+            console.error("Failed to parse JSON response from image analysis", e);
+            return {
+                text: responseText,
+                translation: ""
+            };
+        }
+    } catch (error) {
+        console.error("Error getting image chat response:", error);
+        return {
+            text: "Sajnos nem tudtam elemezni a képet. (I couldn't analyze the image.)",
+            translation: "すみません、画像を解析できませんでした。"
+        };
+    }
+}
+
