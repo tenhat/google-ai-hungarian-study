@@ -111,6 +111,8 @@ const Quiz: React.FC = () => {
     setSelectedOption('__GIVE_UP__'); // Special value to indicate give up
     setIsCorrect(false);
     updateWordProgress(currentWord.id, false);
+    // 画面を一番上にスクロール
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const playAudio = () => {

@@ -13,6 +13,12 @@ import { AuthProvider } from './contexts/AuthContext';
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<View>(View.Home);
 
+  // ビュー切り替え時に画面上部にスクロール
+  const handleViewChange = (view: View) => {
+    setCurrentView(view);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const renderView = () => {
     switch (currentView) {
       case View.Quiz:
@@ -21,7 +27,7 @@ const App: React.FC = () => {
         return <Chat />;
       case View.Home:
       default:
-        return <Home setCurrentView={setCurrentView} />;
+        return <Home setCurrentView={handleViewChange} />;
     }
   };
 
@@ -36,21 +42,21 @@ const App: React.FC = () => {
         <nav className="sticky bottom-0 bg-white shadow-t border-t border-slate-200">
           <div className="container mx-auto flex justify-around p-2">
             <button
-              onClick={() => setCurrentView(View.Home)}
+              onClick={() => handleViewChange(View.Home)}
               className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-colors ${currentView === View.Home ? 'text-blue-600' : 'text-slate-500 hover:bg-slate-100'}`}
             >
               <HomeIcon size={24} />
               <span className="text-xs font-medium">Home</span>
             </button>
             <button
-              onClick={() => setCurrentView(View.Quiz)}
+              onClick={() => handleViewChange(View.Quiz)}
               className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-colors ${currentView === View.Quiz ? 'text-blue-600' : 'text-slate-500 hover:bg-slate-100'}`}
             >
               <BrainCircuit size={24} />
               <span className="text-xs font-medium">Quiz</span>
             </button>
             <button
-              onClick={() => setCurrentView(View.Chat)}
+              onClick={() => handleViewChange(View.Chat)}
               className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-colors ${currentView === View.Chat ? 'text-blue-600' : 'text-slate-500 hover:bg-slate-100'}`}
             >
               <MessageSquare size={24} />
