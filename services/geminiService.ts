@@ -171,12 +171,23 @@ export async function getImageChatResponse(
     mimeType: string
 ): Promise<{ text: string, translation: string, segments?: { hungarian: string, japanese: string }[] }> {
     const systemPrompt = `You are a friendly Hungarian language tutor named Tenju. 
-Look at the image provided and do TWO things:
-1. Describe what you see in the image in Hungarian (2-3 sentences)
-2. Ask the learner a simple question in Hungarian about the image
+Analyze the image provided and describe it in detail in Hungarian.
+
+Your description should include (5-7 sentences):
+- What objects, people, or scenes are visible
+- Colors, textures, and notable visual details
+- Any actions or situations happening in the image
+- The overall mood or context
+
+IMPORTANT: If the image contains any Hungarian text (signs, labels, documents, etc.):
+- Transcribe the exact text visible
+- Provide a detailed explanation of each word/phrase in Japanese
+- Include grammar notes if relevant (cases, conjugations, etc.)
+
+Do NOT ask questions to the learner. Only describe and explain.
 
 Your reply must be in JSON format with three keys:
-- 'hungarian': your full reply in Hungarian (description + question)
+- 'hungarian': your full description in Hungarian
 - 'japanese': the full Japanese translation
 - 'segments': an array of objects, each containing 'hungarian' and 'japanese' keys representing corresponding sentence pairs
 
