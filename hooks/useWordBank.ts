@@ -15,6 +15,7 @@ interface WordBankContextType {
   loading: boolean;
   markAsMastered: (wordId: string) => void;
   updateWord: (word: Word) => void;
+  deleteWord: (wordId: string) => void;
 }
 
 const WordBankContext = createContext<WordBankContextType | undefined>(undefined);
@@ -22,7 +23,7 @@ const WordBankContext = createContext<WordBankContextType | undefined>(undefined
 const LOCAL_STORAGE_KEY_WORDS = 'hungarian-study-tenju-words';
 const LOCAL_STORAGE_KEY_PROGRESS = 'hungarian-study-tenju-progress';
 
-import { doc, setDoc, getDoc, collection, getDocs, writeBatch } from 'firebase/firestore';
+import { doc, setDoc, getDoc, collection, getDocs, writeBatch, deleteDoc } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -416,7 +417,24 @@ export const WordBankProvider: React.FC<{ children: ReactNode }> = ({ children }
     }
   }, [progress, user]);
 
-  const contextValue = { words, progress, getWordById, getWordsForQuiz, getWordsForReviewChallenge, updateWordProgress, resetWordProgress, addNewWord, getStats, loading, markAsMastered, updateWord };
+  const deleteWord = useCallback(async (wordId: string) => {
+    setWords(prevWords => prevWords.filter(w => w.id !== wordId));
+    setProgress(prevProgress => {
+        const newProgress = new Map(prevProgress);
+        newProgress.delete(wordId);
+        return newProgress;
+    });
+
+    if (user) {
+        try {
+            await deleteDoc(doc(db, `users/${user.uid}/words`, wordId));
+        } catch (error) {
+            console.error("Error deleting word from Firestore:", error);
+        }
+    }
+  }, [user]);
+
+  const contextValue = { words, progress, getWordById, getWordsForQuiz, getWordsForReviewChallenge, updateWordProgress, resetWordProgress, addNewWord, getStats, loading, markAsMastered, updateWord, deleteWord };
   return React.createElement(WordBankContext.Provider, { value: contextValue }, children);
 };
 

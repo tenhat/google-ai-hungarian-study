@@ -20,7 +20,7 @@ const Home: React.FC<HomeProps> = ({ setCurrentView }) => {
     return (
       <div className="flex-grow flex flex-col justify-center items-center p-4">
         <Loader className="animate-spin text-blue-600" size={48} />
-        <p className="text-slate-500 mt-4 font-medium">Loading your progress...</p>
+        <p className="text-slate-500 mt-4 font-medium">読み込み中...</p>
       </div>
     );
   }
@@ -29,7 +29,7 @@ const Home: React.FC<HomeProps> = ({ setCurrentView }) => {
     <div className="flex-grow flex flex-col justify-center items-center p-4 space-y-8 animate-fade-in relative">
       <div className="text-center animate-slide-up">
         <h2 className="text-3xl font-bold text-slate-800">Üdvözöljük!</h2>
-        <p className="text-slate-500 mt-2">Welcome to your Hungarian learning dashboard.</p>
+        <p className="text-slate-500 mt-2">ハンガリー語学習ダッシュボードへようこそ</p>
       </div>
 
       <div className="w-full max-w-md bg-white p-6 rounded-xl shadow-xl border border-slate-100 space-y-4 animate-slide-up" style={{ animationDelay: '100ms' }}>
@@ -37,21 +37,21 @@ const Home: React.FC<HomeProps> = ({ setCurrentView }) => {
         <div className="grid grid-cols-3 gap-4 text-center">
           <StatCard 
             icon={<Star size={24} className="text-yellow-500" />} 
-            label="New" 
+            label="未習得" 
             value={stats.newCount} 
             delay="200ms" 
             onClick={() => setSelectedStatus(WordStatus.New)}
           />
           <StatCard 
             icon={<Clock size={24} className="text-orange-500" />} 
-            label="Learning" 
+            label="学習中" 
             value={stats.learningCount} 
             delay="300ms" 
             onClick={() => setSelectedStatus(WordStatus.Learning)}
           />
           <StatCard 
             icon={<CheckCircle size={24} className="text-green-500" />} 
-            label="Mastered" 
+            label="習得済み" 
             value={stats.masteredCount} 
             delay="400ms" 
             onClick={() => setSelectedStatus(WordStatus.Mastered)}
@@ -63,7 +63,7 @@ const Home: React.FC<HomeProps> = ({ setCurrentView }) => {
         <ActionButton
           icon={<BrainCircuit size={32} />}
           title="単語クイズ"
-          subtitle={`${dueWordsCount} words to review`}
+          subtitle={`${dueWordsCount} 単語の復習が必要です`}
           onClick={() => setCurrentView(View.Quiz)}
           className="bg-gradient-to-br from-blue-600 to-indigo-600 hover:shadow-blue-200"
           badge={dueWordsCount > 0 ? dueWordsCount.toString() : undefined}
@@ -72,7 +72,7 @@ const Home: React.FC<HomeProps> = ({ setCurrentView }) => {
         <ActionButton
           icon={<MessageSquare size={32} />}
           title="AIチャット"
-          subtitle="Practice speaking"
+          subtitle="会話練習"
           onClick={() => setCurrentView(View.Chat)}
           className="bg-gradient-to-br from-purple-600 to-fuchsia-600 hover:shadow-purple-200"
           delay="600ms"

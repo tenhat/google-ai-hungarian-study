@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Word, WordStatus } from '../types';
 import { useWordBank } from '../hooks/useWordBank';
-import { X, Edit2, Save, Volume2 } from 'lucide-react';
+import { X, Edit2, Save, Volume2, Trash2, Check } from 'lucide-react';
 
 interface WordListProps {
   status: WordStatus;
@@ -15,14 +15,15 @@ const statusColors = {
 };
 
 const statusLabels = {
-    [WordStatus.New]: 'New Words',
-    [WordStatus.Learning]: 'Learning',
-    [WordStatus.Mastered]: 'Mastered',
+    [WordStatus.New]: '未習得の単語',
+    [WordStatus.Learning]: '学習中',
+    [WordStatus.Mastered]: '習得済み',
 };
 
 const WordList: React.FC<WordListProps> = ({ status, onClose }) => {
-  const { words, progress, updateWord } = useWordBank();
+  const { words, progress, updateWord, deleteWord, markAsMastered } = useWordBank();
   const [editingWord, setEditingWord] = useState<Word | null>(null);
+  const [deletingWord, setDeletingWord] = useState<Word | null>(null);
 
   // フィルタリング
   const filteredWords = words.filter(word => {
@@ -85,7 +86,7 @@ const WordList: React.FC<WordListProps> = ({ status, onClose }) => {
             <div className="flex-grow overflow-y-auto p-4 space-y-3 custom-scrollbar">
                 {filteredWords.length === 0 ? (
                     <div className="text-center text-slate-400 py-10">
-                        <p>No words in this category yet.</p>
+                        <p>このカテゴリーにはまだ単語がありません。</p>
                     </div>
                 ) : (
                     filteredWords.map(word => (
@@ -106,6 +107,22 @@ const WordList: React.FC<WordListProps> = ({ status, onClose }) => {
                                 >
                                     <Edit2 size={18} />
                                 </button>
+                                {status === WordStatus.Learning && (
+                                    <button
+                                        onClick={() => markAsMastered(word.id)}
+                                        className="text-slate-400 hover:text-green-600 p-2 hover:bg-green-50 rounded-lg transition-colors ml-1"
+                                        title="Mark as Mastered"
+                                    >
+                                        <Check size={18} />
+                                    </button>
+                                )}
+                                <button 
+                                    onClick={() => setDeletingWord(word)}
+                                    className="text-slate-400 hover:text-red-600 p-2 hover:bg-red-50 rounded-lg transition-colors ml-1"
+                                    title="Delete word"
+                                >
+                                    <Trash2 size={18} />
+                                </button>
                             </div>
                             {word.example && (
                                 <div className="mt-2 pt-2 border-t border-slate-100 text-sm">
@@ -119,12 +136,47 @@ const WordList: React.FC<WordListProps> = ({ status, onClose }) => {
             </div>
         </div>
 
+        {/* Delete Confirmation Modal */}
+        {deletingWord && (
+            <div className="absolute inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
+                 <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6 space-y-4 animate-scale-in">
+                    <div className="text-center">
+                        <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <Trash2 className="text-red-500" size={24} />
+                        </div>
+                        <h4 className="text-lg font-bold text-slate-800">単語を削除しますか？</h4>
+                        <p className="text-slate-600 mt-2">
+                            本当に <span className="font-bold text-slate-800">"{deletingWord.hungarian}"</span> を削除してもよろしいですか？
+                            この操作は取り消せません。
+                        </p>
+                    </div>
+                    <div className="flex gap-3 pt-2">
+                        <button 
+                            onClick={() => setDeletingWord(null)}
+                            className="flex-1 py-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors font-medium"
+                        >
+                            キャンセル
+                        </button>
+                        <button 
+                            onClick={() => {
+                                deleteWord(deletingWord.id);
+                                setDeletingWord(null);
+                            }}
+                            className="flex-1 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 shadow-md transition-colors font-medium"
+                        >
+                            削除
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )}
+
         {/* Edit Modal (Overlay) */}
         {editingWord && (
             <div className="absolute inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center p-4 z-50">
                 <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 space-y-4 animate-scale-in">
                     <h4 className="text-lg font-bold text-slate-800 border-b pb-2">
-                        Edit: <span className="text-blue-600">{editingWord.hungarian}</span>
+                        編集: <span className="text-blue-600">{editingWord.hungarian}</span>
                     </h4>
                     
                     <div>
@@ -138,7 +190,7 @@ const WordList: React.FC<WordListProps> = ({ status, onClose }) => {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-slate-600 mb-1">例文 (Hungarian)</label>
+                        <label className="block text-sm font-medium text-slate-600 mb-1">例文 (ハンガリー語)</label>
                         <textarea 
                             className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
                             rows={2}
@@ -162,13 +214,13 @@ const WordList: React.FC<WordListProps> = ({ status, onClose }) => {
                             onClick={() => setEditingWord(null)}
                             className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
                         >
-                            Cancel
+                            キャンセル
                         </button>
                         <button 
                             onClick={handleSave}
                             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-md flex items-center gap-2 transition-colors"
                         >
-                            <Save size={16} /> Save Changes
+                            <Save size={16} /> 保存
                         </button>
                     </div>
                 </div>

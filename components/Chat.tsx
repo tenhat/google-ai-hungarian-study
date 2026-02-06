@@ -422,17 +422,17 @@ const Chat: React.FC = () => {
                   {message.correction.isCorrect ? (
                     <div className="flex items-center gap-2 font-medium">
                       <div className="bg-emerald-100 p-1 rounded-full"><CheckCircle size={14} className="text-emerald-600" /></div>
-                      <span>Natural & Correct!</span>
+                      <span>自然で正確な表現です！</span>
                     </div>
                   ) : (
                     <div className="flex flex-col gap-2">
 					  <div className="flex items-center gap-2 font-medium border-b border-amber-100 pb-2 mb-1">
                          <div className="bg-amber-100 p-1 rounded-full"><AlertCircle size={14} className="text-amber-600" /></div>
-                         <span>Better phrasing available</span>
+                         <span>より良い表現があります</span>
                       </div>
                       <div className="space-y-1">
                         <p className="font-medium flex items-center gap-2 text-amber-900">
-                            <span className="text-xs bg-amber-200 px-1.5 rounded text-amber-800">BETTER</span>
+                            <span className="text-xs bg-amber-200 px-1.5 rounded text-amber-800">改善案</span>
                             {message.correction.correctedSentence}
                         </p>
                         <p className="text-xs opacity-90 pl-1 border-l-2 border-amber-200">{message.correction.explanation}</p>
@@ -455,7 +455,7 @@ const Chat: React.FC = () => {
                         <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
                         <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
                     </div>
-                    <p className="text-xs text-slate-400 mt-2 font-medium">Thinking...</p>
+                    <p className="text-xs text-slate-400 mt-2 font-medium">考え中...</p>
                 </div>
             </div>
         )}
@@ -475,20 +475,20 @@ const Chat: React.FC = () => {
             </div>
             
             <div className="flex flex-col gap-2 flex-grow justify-center">
-              <p className="text-sm font-medium text-slate-700">Ready to send this image?</p>
+              <p className="text-sm font-medium text-slate-700">この画像を送信しますか？</p>
               <div className="flex gap-2">
                 <button 
                   onClick={handleImageSend}
                   disabled={isLoading}
                   className="px-4 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-200 disabled:bg-slate-300 disabled:shadow-none transition-all text-sm font-bold flex items-center gap-1"
                 >
-                  <Send size={14} /> Send
+                  <Send size={14} /> 送信
                 </button>
                 <button 
                   onClick={handleCancelImage}
                   className="px-4 py-1.5 text-slate-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors text-sm font-medium"
                 >
-                  Cancel
+                  キャンセル
                 </button>
               </div>
             </div>
@@ -511,7 +511,7 @@ const Chat: React.FC = () => {
           <label 
             htmlFor="camera-input"
             className="text-slate-400 hover:text-blue-600 hover:bg-blue-50 p-3 rounded-xl cursor-pointer transition-all duration-300 transform hover:scale-105 active:scale-95"
-            title="Upload image"
+            title="画像をアップロード"
           >
             <Camera size={22} />
           </label>
@@ -520,7 +520,7 @@ const Chat: React.FC = () => {
             type="text"
             value={userInput}
             onChange={(e) => setUserInput(e.target.value)}
-            placeholder="Type a message in Hungarian..."
+            placeholder="ハンガリー語でメッセージを入力..."
             className="flex-grow p-3 bg-slate-50 border-transparent focus:bg-white border focus:border-blue-200 rounded-xl focus:ring-4 focus:ring-blue-50/50 focus:outline-none transition-all placeholder:text-slate-400 text-slate-700"
             disabled={isLoading}
           />
