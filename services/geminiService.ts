@@ -249,14 +249,14 @@ Use vocabulary appropriate for a beginner-to-intermediate learner. Do not use ma
  * @param japaneseText - 翻訳する日本語テキスト
  */
 export async function getTranslation(japaneseText: string): Promise<TranslationResult> {
-    const prompt = `You are a Hungarian language expert. Translate the following Japanese text into Hungarian and provide a detailed explanation.
+    const prompt = `You are a Hungarian language expert. Translate the following Japanese text into Hungarian.
 
 Japanese text: "${japaneseText}"
 
 Return a JSON object with the following structure:
 {
   "hungarian": "The Hungarian translation of the text",
-  "explanation": "A detailed explanation in Japanese about the grammar, verb conjugations, and sentence structure used in the translation. Include how verbs are conjugated, case endings used, and any important grammatical points.",
+  "explanation": "簡潔な文法ポイントを1-2行で説明（例：動詞の活用形、格語尾など重要な点のみ）",
   "importantWords": [
     {
       "hungarian": "word1",
@@ -270,8 +270,8 @@ Return a JSON object with the following structure:
 }
 
 Important notes:
-- The explanation should be in Japanese and be educational for learners
-- Include 3-5 important words that appear in the translation or are related to it
+- The explanation should be BRIEF (1-2 lines max) in Japanese, focusing only on the most important grammar point
+- Include 2-3 important words that appear in the translation
 - Each important word should have a realistic example sentence
 - Do not use markdown formatting`;
 
