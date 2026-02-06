@@ -3,6 +3,28 @@ import { useWordBank } from '../hooks/useWordBank';
 import { Word, QuizMode } from '../types';
 import { ArrowRight, Volume2, Check, X, CheckCircle, HelpCircle } from 'lucide-react';
 
+const highlightWordInSentence = (sentence: string, wordToHighlight: string) => {
+  if (!sentence || !wordToHighlight) return sentence;
+  
+  const escapedWord = wordToHighlight.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(`(${escapedWord})`, 'gi');
+  const parts = sentence.split(regex);
+
+  return (
+    <span>
+      {parts.map((part, index) => 
+        part.toLowerCase() === wordToHighlight.toLowerCase() ? (
+          <span key={index} className="bg-yellow-200 text-yellow-800 font-bold px-1 rounded-sm mx-0.5">
+            {part}
+          </span>
+        ) : (
+          <span key={index}>{part}</span>
+        )
+      )}
+    </span>
+  );
+};
+
 const Quiz: React.FC = () => {
   const { words, getWordsForQuiz, updateWordProgress, getWordById, progress, markAsMastered, loading } = useWordBank();
   
@@ -201,7 +223,7 @@ const Quiz: React.FC = () => {
                 {/* Only show example if word has one AND current item type is 'with_example' */}
                 {currentWord.example && currentItem.type === 'with_example' && (
                   <div className="mt-4 p-3 bg-slate-50 rounded-lg border border-slate-100 max-w-md w-full text-center mx-auto animate-fade-in" style={{ animationDelay: '200ms' }}>
-                    <p className="text-base font-medium text-slate-700 mb-1 leading-relaxed">{currentWord.example.sentence}</p>
+                    <p className="text-base font-medium text-slate-700 mb-1 leading-relaxed">{highlightWordInSentence(currentWord.example.sentence, currentWord.hungarian)}</p>
                     {selectedOption && <p className="text-xs text-slate-500 border-t border-slate-200 pt-1 mt-1">{currentWord.example.translation}</p>}
                   </div>
                 )}
