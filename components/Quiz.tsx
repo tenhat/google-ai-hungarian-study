@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useWordBank } from '../hooks/useWordBank';
 import { Word, QuizMode } from '../types';
 import { ArrowRight, Volume2, Check, X, CheckCircle, HelpCircle } from 'lucide-react';
+import confetti from 'canvas-confetti';
+
 
 const highlightWordInSentence = (sentence: string, wordToHighlight: string) => {
   if (!sentence || !wordToHighlight) return sentence;
@@ -121,6 +123,15 @@ const Quiz: React.FC = () => {
     setIsCorrect(wasCorrect);
     updateWordProgress(currentWord.id, wasCorrect);
     playAudio();
+
+    if (wasCorrect) {
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#22c55e', '#3b82f6', '#fbbf24', '#f87171']
+      });
+    }
   };
 
   const handleMastered = () => {
@@ -281,22 +292,36 @@ const Quiz: React.FC = () => {
             )}
 
             {selectedOption && (
-                <div className={`p-4 rounded-xl flex items-center justify-between shadow-lg animate-scale-in ${isCorrect ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
-                    <div className="flex items-center gap-3">
-                        <div className={`p-1.5 rounded-full ${isCorrect ? 'bg-green-200' : 'bg-red-200'}`}>
-                            {isCorrect ? <Check className="text-green-700" size={20} /> : <X className="text-red-700" size={20} />}
+                <div className={`p-6 rounded-2xl flex flex-col md:flex-row items-center justify-between shadow-2xl animate-scale-in border-2 mt-4 
+                    ${isCorrect 
+                        ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200' 
+                        : 'bg-gradient-to-r from-red-50 to-orange-50 border-red-200 animate-shake'
+                    }`}>
+                    <div className="flex items-center gap-4 mb-4 md:mb-0 w-full md:w-auto">
+                        <div className={`p-3 rounded-full shadow-md ${isCorrect ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
+                            {isCorrect ? <Check size={28} strokeWidth={3} /> : <X size={28} strokeWidth={3} />}
                         </div>
-                        <div>
-                            <p className={`text-base font-bold ${isCorrect ? 'text-green-800' : 'text-red-800'}`}>{isCorrect ? 'Correct!' : 'Incorrect'}</p>
-                            {!isCorrect && <p className="text-red-700 text-sm font-medium">Correct answer: <span className="font-bold">{correctAnswer}</span></p>}
+                        <div className="flex-1">
+                            <p className={`text-xl font-black ${isCorrect ? 'text-green-800' : 'text-red-800'}`}>
+                                {isCorrect ? 'Correct!' : 'Incorrect'}
+                            </p>
+                            {!isCorrect && (
+                                <p className="text-red-700 font-medium mt-1">
+                                    Correct answer: <span className="font-bold text-lg border-b-2 border-red-300 ml-1">{correctAnswer}</span>
+                                </p>
+                            )}
                         </div>
                     </div>
                     <button 
                         onClick={handleNext} 
-                        className="bg-blue-600 text-white font-bold py-2.5 px-5 rounded-lg shadow-md hover:bg-blue-700 hover:shadow-blue-300 hover:scale-105 transition-all flex items-center gap-1.5 text-sm"
+                        className={`w-full md:w-auto font-bold py-3 px-8 rounded-xl shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2 text-base
+                            ${isCorrect 
+                                ? 'bg-green-600 hover:bg-green-700 text-white shadow-green-200' 
+                                : 'bg-slate-800 hover:bg-slate-900 text-white'
+                            }`}
                         autoFocus
                     >
-                        Next <ArrowRight size={18} />
+                        <span>Next Question</span> <ArrowRight size={20} />
                     </button>
                 </div>
             )}
