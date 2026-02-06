@@ -176,20 +176,23 @@ const Quiz: React.FC = () => {
 
 
   return (
-    <div className="flex-grow flex flex-col justify-center p-4">
-        <div className="w-full max-w-2xl mx-auto space-y-6">
-            <div className="relative p-4 rounded-lg bg-white shadow-md">
-                <div className="absolute top-2 right-2 text-xs text-slate-400 font-semibold">
+    <div className="flex-grow flex flex-col justify-center p-4 animate-fade-in">
+        <div 
+          key={currentIndex} // キー変更でアニメーション再発火
+          className="w-full max-w-2xl mx-auto space-y-6 animate-slide-up"
+        >
+            <div className="relative p-6 rounded-xl bg-white shadow-xl border border-slate-100 ring-1 ring-slate-50">
+                <div className="absolute top-4 right-4 text-xs font-bold px-2 py-1 bg-slate-100 text-slate-500 rounded-full">
                     {currentIndex + 1} / {quizItems.length}
                 </div>
-                 {wordContext && <div className="text-sm text-blue-500 font-semibold mb-4">{wordContext}</div>}
-                <div className="text-center">
-                    <p className="text-slate-500 mb-2">{quizMode === QuizMode.HuToJp ? 'Hungarian' : 'Japanese'}</p>
-                    <h2 className="text-4xl md:text-5xl font-bold text-slate-800">{question}</h2>
+                 {wordContext && <div className="text-sm text-blue-600 font-bold mb-4 tracking-wide bg-blue-50 inline-block px-2 py-0.5 rounded">{wordContext}</div>}
+                <div className="text-center py-4">
+                    <p className="text-slate-400 text-sm font-bold uppercase tracking-widest mb-2">{quizMode === QuizMode.HuToJp ? 'Hungarian' : 'Japanese'}</p>
+                    <h2 className="text-4xl md:text-6xl font-extrabold text-slate-800 tracking-tight">{question}</h2>
                     {quizMode === QuizMode.HuToJp && (
                         <button 
                             onClick={playAudio}
-                            className="mt-2 text-slate-400 hover:text-blue-600 transition-colors"
+                            className="mt-4 p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all"
                         >
                             <Volume2 size={24} />
                         </button>
@@ -197,9 +200,9 @@ const Quiz: React.FC = () => {
                 </div>
                 {/* Only show example if word has one AND current item type is 'with_example' */}
                 {currentWord.example && currentItem.type === 'with_example' && (
-                  <div className="mt-6 p-4 bg-slate-50 rounded-lg max-w-md w-full text-center mx-auto">
-                    <p className="text-lg font-medium text-slate-700 mb-1">{currentWord.example.sentence}</p>
-                    {selectedOption && <p className="text-sm text-slate-500">{currentWord.example.translation}</p>}
+                  <div className="mt-6 p-5 bg-slate-50 rounded-xl border border-slate-100 max-w-md w-full text-center mx-auto animate-fade-in" style={{ animationDelay: '200ms' }}>
+                    <p className="text-lg font-medium text-slate-700 mb-2 leading-relaxed">{currentWord.example.sentence}</p>
+                    {selectedOption && <p className="text-sm text-slate-500 border-t border-slate-200 pt-2 mt-2">{currentWord.example.translation}</p>}
                   </div>
                 )}
             </div>
@@ -207,10 +210,10 @@ const Quiz: React.FC = () => {
             <div className="flex justify-end">
                 <button 
                   onClick={handleMastered}
-                  className="flex items-center gap-2 text-green-600 hover:text-green-700 font-semibold px-4 py-2 rounded-lg hover:bg-green-50 transition-colors"
+                  className="flex items-center gap-2 text-emerald-600 hover:text-emerald-700 font-bold px-4 py-2 rounded-lg hover:bg-emerald-50 transition-colors text-sm"
                   title="Already know this word? Skip it."
                 >
-                    <CheckCircle size={20} />
+                    <CheckCircle size={18} />
                     <span>I know this</span>
                 </button>
             </div>
@@ -221,12 +224,13 @@ const Quiz: React.FC = () => {
                         key={index}
                         onClick={() => handleAnswer(option)}
                         disabled={!!selectedOption}
-                        className={`p-4 rounded-lg text-lg font-semibold text-left transition-all duration-200
-                        ${selectedOption === null ? 'bg-white shadow hover:bg-slate-50 hover:shadow-lg' : ''}
-                        ${selectedOption !== null && option === correctAnswer ? 'bg-green-100 text-green-800 border-2 border-green-400' : ''}
-                        ${selectedOption === option && !isCorrect ? 'bg-red-100 text-red-800 border-2 border-red-400' : ''}
-                        ${selectedOption !== null && option !== correctAnswer && selectedOption !== option ? 'bg-slate-100 text-slate-500' : ''}
+                        className={`p-5 rounded-xl text-lg font-bold text-left transition-all duration-200 border-2
+                        ${selectedOption === null ? 'bg-white border-transparent shadow-sm hover:shadow-md hover:border-indigo-200 hover:scale-[1.02] active:scale-[0.98]' : ''}
+                        ${selectedOption !== null && option === correctAnswer ? 'bg-green-100 text-green-800 border-green-500 shadow-none' : ''}
+                        ${selectedOption === option && !isCorrect ? 'bg-red-100 text-red-800 border-red-500 shadow-none' : ''}
+                        ${selectedOption !== null && option !== correctAnswer && selectedOption !== option ? 'bg-slate-50 text-slate-400 border-transparent opacity-50' : ''}
                         `}
+                        style={{ animationDelay: `${index * 50}ms` }}
                     >
                         {option}
                     </button>
@@ -234,27 +238,33 @@ const Quiz: React.FC = () => {
             </div>
 
             {!selectedOption && (
-                <div className="flex justify-center mt-4">
+                <div className="flex justify-center mt-6">
                     <button 
                         onClick={handleGiveUp}
-                        className="flex items-center gap-2 text-slate-500 hover:text-slate-700 font-medium px-4 py-2 rounded-lg hover:bg-slate-100 transition-colors"
+                        className="flex items-center gap-2 text-slate-400 hover:text-slate-600 font-medium px-6 py-2 rounded-full hover:bg-slate-100 transition-colors text-sm"
                     >
-                        <HelpCircle size={20} />
+                        <HelpCircle size={18} />
                         <span>I don't know</span>
                     </button>
                 </div>
             )}
 
             {selectedOption && (
-                <div className={`p-4 rounded-lg flex items-center justify-between ${isCorrect ? 'bg-green-100' : 'bg-red-100'}`}>
+                <div className={`p-6 rounded-xl flex items-center justify-between shadow-lg animate-scale-in ${isCorrect ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
                     <div className="flex items-center gap-4">
-                        {isCorrect ? <Check className="text-green-600" size={32} /> : <X className="text-red-600" size={32} />}
+                        <div className={`p-2 rounded-full ${isCorrect ? 'bg-green-200' : 'bg-red-200'}`}>
+                            {isCorrect ? <Check className="text-green-700" size={24} /> : <X className="text-red-700" size={24} />}
+                        </div>
                         <div>
-                            <p className={`font-bold ${isCorrect ? 'text-green-800' : 'text-red-800'}`}>{isCorrect ? 'Correct!' : 'Incorrect'}</p>
-                            {!isCorrect && <p className="text-red-700">Correct answer: {correctAnswer}</p>}
+                            <p className={`text-lg font-bold ${isCorrect ? 'text-green-800' : 'text-red-800'}`}>{isCorrect ? 'Correct!' : 'Incorrect'}</p>
+                            {!isCorrect && <p className="text-red-700 font-medium">Correct answer: <span className="font-bold">{correctAnswer}</span></p>}
                         </div>
                     </div>
-                    <button onClick={handleNext} className="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg shadow hover:bg-blue-700 transition-colors flex items-center gap-2">
+                    <button 
+                        onClick={handleNext} 
+                        className="bg-blue-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:bg-blue-700 hover:shadow-blue-300 hover:scale-105 transition-all flex items-center gap-2"
+                        autoFocus
+                    >
                         Next <ArrowRight size={20} />
                     </button>
                 </div>

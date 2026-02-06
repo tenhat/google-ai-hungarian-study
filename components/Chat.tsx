@@ -331,32 +331,60 @@ const Chat: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full max-h-[80vh] bg-white rounded-xl shadow-lg border border-slate-200 relative">
+    <div className="flex flex-col h-full max-h-[80vh] bg-white rounded-2xl shadow-xl border border-slate-200 relative animate-fade-in overflow-hidden">
       {/* ヘッダーバー */}
-      <div className="flex items-center justify-between px-4 py-2 border-b border-slate-200">
-        <h2 className="text-sm font-medium text-slate-600">AIチャット</h2>
+      <div className="flex items-center justify-between px-6 py-4 bg-white/80 backdrop-blur-md border-b border-slate-100 z-10">
+        <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-500 to-indigo-500 flex items-center justify-center text-white shadow-md animate-pulse-subtle">
+                <Sparkles size={16} />
+            </div>
+            <h2 className="text-lg font-bold text-slate-700 tracking-tight">AI Chat Partner</h2>
+        </div>
         <button
           onClick={handleClearHistory}
-          className="text-slate-400 hover:text-red-500 p-1 rounded transition-colors"
+          className="text-slate-400 hover:text-red-500 p-2 hover:bg-red-50 rounded-full transition-all duration-300"
           title="履歴を削除"
         >
           <Trash2 size={18} />
         </button>
       </div>
-      <div className="flex-grow p-4 overflow-y-auto space-y-4">
-        {messages.map((message) => (
-          <div key={message.id} className={`flex items-end gap-2 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            {message.role === 'model' && <div className="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center text-white flex-shrink-0"><Sparkles size={20} /></div>}
-            <div className={`max-w-xs md:max-w-md lg:max-w-lg p-3 rounded-2xl ${message.role === 'user' ? 'bg-blue-500 text-white rounded-br-lg' : 'bg-slate-200 text-slate-800 rounded-bl-lg'}`}>
+      
+      <div className="flex-grow p-4 overflow-y-auto space-y-4 custom-scrollbar">
+        {messages.length === 0 && (
+            <div className="flex flex-col items-center justify-center h-full text-slate-400 opacity-60 animate-fade-in">
+                <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+                    <Sparkles size={32} className="text-slate-300" />
+                </div>
+                <p className="text-sm font-medium">会話を始めましょう (Kezdjünk beszélgetni!)</p>
+            </div>
+        )}
+        {messages.map((message, index) => (
+          <div 
+            key={message.id} 
+            className={`flex items-end gap-2 ${message.role === 'user' ? 'justify-end' : 'justify-start'} animate-slide-up`}
+            style={{ animationDelay: `${index * 50}ms` }}
+          >
+            {message.role === 'model' && (
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white flex-shrink-0 shadow-md transform translate-y-[-4px]">
+                    <Sparkles size={16} />
+                </div>
+            )}
+            <div className={`max-w-[85%] md:max-w-md lg:max-w-lg p-4 rounded-2xl shadow-sm transition-all hover:shadow-md ${
+                message.role === 'user' 
+                ? 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white rounded-br-sm' 
+                : 'bg-white border border-slate-100 text-slate-700 rounded-bl-sm'
+            }`}>
               {/* 画像がある場合は表示 */}
               {message.imageUrl && (
-                <img 
-                  src={message.imageUrl} 
-                  alt="送信した画像" 
-                  className="max-w-full rounded-lg mb-2"
-                />
+                <div className="mb-3 overflow-hidden rounded-lg border border-white/20">
+                    <img 
+                    src={message.imageUrl} 
+                    alt="送信した画像" 
+                    className="max-w-full w-full h-auto object-cover transform hover:scale-105 transition-transform duration-500"
+                    />
+                </div>
               )}
-              <p>
+              <p className="leading-relaxed text-[15px]">
                 {message.role === 'model' 
                  ? message.text.split(/([a-zA-ZáéíóöőúüűÁÉÍÓÖŐÚÜŰ0-9]+)/g).map((part, i) => {
                     const isWord = /^[a-zA-ZáéíóöőúüűÁÉÍÓÖŐÚÜŰ0-9]+$/.test(part);
@@ -365,7 +393,7 @@ const Chat: React.FC = () => {
                             <span 
                                 key={i} 
                                 onClick={() => handleWordClick(part, message.text, message.translation, message.segments)} 
-                                className="cursor-pointer hover:bg-yellow-200 rounded px-0.5 inline-block"
+                                className="cursor-pointer hover:bg-yellow-200/50 hover:text-yellow-700 rounded px-0.5 inline-block transition-colors duration-200 border-b border-transparent hover:border-yellow-400"
                                 role="button"
                                 tabIndex={0}
                             >
@@ -380,25 +408,31 @@ const Chat: React.FC = () => {
                 }
               </p>
               {message.role === 'model' && message.translation && (
-                  <p className="mt-2 text-sm text-slate-500 border-t border-slate-300 pt-1">
-                      {message.translation}
+                  <p className="mt-3 text-sm text-slate-500 border-t border-slate-100 pt-2 flex items-start gap-2">
+                      <span className="bg-slate-100 text-slate-500 text-[10px] px-1.5 py-0.5 rounded uppercase font-bold tracking-wider mt-0.5">JP</span>
+                      <span className="opacity-90">{message.translation}</span>
                   </p>
               )}
               {message.role === 'user' && message.correction && (
-                <div className={`mt-2 p-2 rounded-lg text-sm ${message.correction.isCorrect ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                <div className={`mt-3 p-3 rounded-xl text-sm border ${message.correction.isCorrect ? 'bg-emerald-50 text-emerald-800 border-emerald-100' : 'bg-amber-50 text-amber-800 border-amber-100'}`}>
                   {message.correction.isCorrect ? (
-                    <div className="flex items-center gap-1">
-                      <CheckCircle size={16} />
-                      <span>Correct!</span>
+                    <div className="flex items-center gap-2 font-medium">
+                      <div className="bg-emerald-100 p-1 rounded-full"><CheckCircle size={14} className="text-emerald-600" /></div>
+                      <span>Natural & Correct!</span>
                     </div>
                   ) : (
-                    <div className="flex flex-col gap-1">
-                      <div className="flex items-center gap-1 font-semibold">
-                         <AlertCircle size={16} />
-                         <span>Correction</span>
+                    <div className="flex flex-col gap-2">
+					  <div className="flex items-center gap-2 font-medium border-b border-amber-100 pb-2 mb-1">
+                         <div className="bg-amber-100 p-1 rounded-full"><AlertCircle size={14} className="text-amber-600" /></div>
+                         <span>Better phrasing available</span>
                       </div>
-                      <p className="font-mono">{message.correction.correctedSentence}</p>
-                      <p className="text-xs mt-1">{message.correction.explanation}</p>
+                      <div className="space-y-1">
+                        <p className="font-medium flex items-center gap-2 text-amber-900">
+                            <span className="text-xs bg-amber-200 px-1.5 rounded text-amber-800">BETTER</span>
+                            {message.correction.correctedSentence}
+                        </p>
+                        <p className="text-xs opacity-90 pl-1 border-l-2 border-amber-200">{message.correction.explanation}</p>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -407,14 +441,17 @@ const Chat: React.FC = () => {
           </div>
         ))}
         {isLoading && (
-            <div className="flex items-end gap-2 justify-start">
-                <div className="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center text-white flex-shrink-0"><Sparkles size={20} /></div>
-                <div className="max-w-xs p-3 rounded-2xl bg-slate-200 rounded-bl-lg">
-                    <div className="flex items-center gap-2 text-slate-500">
-                        <div className="w-2 h-2 bg-slate-400 rounded-full animate-pulse"></div>
-                        <div className="w-2 h-2 bg-slate-400 rounded-full animate-pulse delay-75"></div>
-                        <div className="w-2 h-2 bg-slate-400 rounded-full animate-pulse delay-150"></div>
+            <div className="flex items-end gap-2 justify-start animate-fade-in">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white flex-shrink-0 shadow-md">
+                    <Sparkles size={16} className="animate-pulse" />
+                </div>
+                <div className="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm rounded-bl-sm">
+                    <div className="flex items-center gap-1.5">
+                        <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                        <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                        <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
                     </div>
+                    <p className="text-xs text-slate-400 mt-2 font-medium">Thinking...</p>
                 </div>
             </div>
         )}
@@ -422,28 +459,32 @@ const Chat: React.FC = () => {
       </div>
       {/* 画像プレビュー */}
       {selectedImage && (
-        <div className="p-4 border-t border-slate-200 bg-slate-50">
-          <div className="flex items-start gap-3">
-            <img 
-              src={selectedImage} 
-              alt="プレビュー" 
-              className="w-24 h-24 object-cover rounded-lg"
-            />
-            <div className="flex flex-col gap-2 flex-grow">
-              <p className="text-sm text-slate-600">この画像を送信しますか？</p>
+        <div className="p-4 border-t border-slate-100 bg-slate-50/50 backdrop-blur-sm animate-slide-up">
+          <div className="flex items-start gap-3 bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+            <div className="relative group">
+                <img 
+                src={selectedImage} 
+                alt="プレビュー" 
+                className="w-20 h-20 object-cover rounded-lg border border-slate-100"
+                />
+                <div className="absolute inset-0 bg-black/10 rounded-lg group-hover:bg-black/20 transition-colors" />
+            </div>
+            
+            <div className="flex flex-col gap-2 flex-grow justify-center">
+              <p className="text-sm font-medium text-slate-700">Ready to send this image?</p>
               <div className="flex gap-2">
                 <button 
                   onClick={handleImageSend}
                   disabled={isLoading}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-slate-400 transition-colors text-sm"
+                  className="px-4 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-200 disabled:bg-slate-300 disabled:shadow-none transition-all text-sm font-bold flex items-center gap-1"
                 >
-                  送信
+                  <Send size={14} /> Send
                 </button>
                 <button 
                   onClick={handleCancelImage}
-                  className="px-4 py-2 text-slate-600 hover:bg-slate-200 rounded-lg transition-colors text-sm"
+                  className="px-4 py-1.5 text-slate-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors text-sm font-medium"
                 >
-                  キャンセル
+                  Cancel
                 </button>
               </div>
             </div>
@@ -451,8 +492,8 @@ const Chat: React.FC = () => {
         </div>
       )}
 
-      <div className="p-4 border-t border-slate-200">
-        <form onSubmit={handleSendMessage} className="flex items-center gap-2">
+      <div className="p-4 border-t border-slate-100 bg-white z-20">
+        <form onSubmit={handleSendMessage} className="flex items-center gap-2 relative">
           {/* カメラボタン */}
           <input
             type="file"
@@ -465,21 +506,28 @@ const Chat: React.FC = () => {
           />
           <label 
             htmlFor="camera-input"
-            className="bg-slate-100 text-slate-600 p-3 rounded-full hover:bg-slate-200 cursor-pointer transition-colors"
+            className="text-slate-400 hover:text-blue-600 hover:bg-blue-50 p-3 rounded-xl cursor-pointer transition-all duration-300 transform hover:scale-105 active:scale-95"
+            title="Upload image"
           >
-            <Camera size={20} />
+            <Camera size={22} />
           </label>
           
           <input
             type="text"
             value={userInput}
             onChange={(e) => setUserInput(e.target.value)}
-            placeholder="ハンガリー語でメッセージを入力..."
-            className="flex-grow p-3 border border-slate-300 rounded-full focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
+            placeholder="Type a message in Hungarian..."
+            className="flex-grow p-3 bg-slate-50 border-transparent focus:bg-white border focus:border-blue-200 rounded-xl focus:ring-4 focus:ring-blue-50/50 focus:outline-none transition-all placeholder:text-slate-400 text-slate-700"
             disabled={isLoading}
           />
-          <button type="submit" className="bg-blue-600 text-white p-3 rounded-full hover:bg-blue-700 disabled:bg-slate-400 transition-colors" disabled={isLoading || !userInput.trim()}>
-            <Send size={20} />
+          <button 
+            type="submit" 
+            className={`p-3 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 active:scale-95 flex items-center justify-center
+                ${!userInput.trim() || isLoading ? 'bg-slate-100 text-slate-400 shadow-none' : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-blue-200 hover:shadow-blue-300'}
+            `}
+            disabled={isLoading || !userInput.trim()}
+          >
+            <Send size={20} className={userInput.trim() && !isLoading ? 'animate-pulse-subtle' : ''}/>
           </button>
         </form>
       </div>

@@ -234,58 +234,71 @@ const ReviewChallenge: React.FC = () => {
 
   // クイズ画面
   return (
-    <div className="flex flex-col min-h-[60vh] p-4 bg-white rounded-xl shadow-lg">
+    <div className="flex flex-col min-h-[60vh] p-6 bg-white rounded-xl shadow-xl border border-orange-50 animate-fade-in relative overflow-hidden">
+      {/* Decorative background element */}
+      <div className="absolute top-0 right-0 w-32 h-32 bg-orange-100/50 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl pointer-events-none"></div>
+
       {/* ヘッダー */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-6 relative z-10">
         <div className="flex items-center gap-2">
-          <Target className="text-orange-500" size={24} />
-          <span className="font-bold text-slate-800">復習チャレンジ</span>
+          <div className="bg-orange-100 p-2 rounded-lg">
+            <Target className="text-orange-600" size={24} />
+          </div>
+          <span className="font-bold text-slate-800 text-lg">Review Challenge</span>
         </div>
-        <span className="text-sm text-slate-500">
+        <span className="text-sm font-bold bg-slate-100 text-slate-500 px-3 py-1 rounded-full">
           {currentIndex + 1} / {quizWords.length}
         </span>
       </div>
 
       {/* プログレスバー */}
-      <div className="w-full bg-slate-200 rounded-full h-2 mb-6">
+      <div className="w-full bg-slate-100 rounded-full h-3 mb-8 overflow-hidden shadow-inner">
         <div 
-          className="bg-orange-500 h-2 rounded-full transition-all"
+          className="bg-gradient-to-r from-orange-400 to-red-500 h-3 rounded-full transition-all duration-500 ease-out shadow-sm"
           style={{ width: `${((currentIndex + 1) / quizWords.length) * 100}%` }}
         />
       </div>
 
       {/* 問題 */}
       {currentWord && (
-        <>
-          <div className="text-center mb-8">
-            <p className="text-sm text-slate-500 mb-2">日本語</p>
-            <p className="text-3xl font-bold text-slate-800 mb-4">
+        <div 
+            key={currentIndex} // キー変更でアニメーション再発火
+            className="flex-grow flex flex-col animate-slide-up"
+        >
+          <div className="text-center mb-10">
+            <p className="text-xs font-bold text-orange-500 uppercase tracking-widest mb-3">Translate into Hungarian</p>
+            <p className="text-3xl md:text-5xl font-extrabold text-slate-800 mb-4 tracking-tight">
               {currentWord.japanese}
             </p>
             {currentWord.example && (
-              <p className="text-sm text-slate-500 italic">
-                ヒント: {currentWord.example.translation}
-              </p>
+              <div className="inline-block bg-orange-50 px-4 py-2 rounded-lg border border-orange-100">
+                <p className="text-sm text-slate-600 italic flex items-center gap-2">
+                  <span className="bg-orange-200 text-orange-800 text-xs px-1.5 rounded font-bold">HINT</span> 
+                  {currentWord.example.translation}
+                </p>
+              </div>
             )}
           </div>
 
           {/* 選択肢 */}
-          <div className="grid grid-cols-1 gap-3 mb-6">
+          <div className="grid grid-cols-1 gap-3 mb-8">
             {options.map((option, index) => {
               const isSelected = selectedOption === option;
               const isCorrectAnswer = option === currentWord.hungarian;
-              let buttonClass = "p-4 rounded-lg border-2 text-left font-medium transition-all";
+              
+              let buttonBaseClass = "p-5 rounded-xl border-2 text-left text-lg font-bold transition-all duration-200 transform hover:scale-[1.01] active:scale-[0.99] relative overflow-hidden";
+              let buttonStateClass = "";
               
               if (selectedOption) {
                 if (isCorrectAnswer) {
-                  buttonClass += " border-green-500 bg-green-50 text-green-700";
+                  buttonStateClass = "border-green-500 bg-green-50 text-green-800 shadow-md";
                 } else if (isSelected) {
-                  buttonClass += " border-red-500 bg-red-50 text-red-700";
+                  buttonStateClass = "border-red-500 bg-red-50 text-red-800 opacity-90";
                 } else {
-                  buttonClass += " border-slate-200 text-slate-400";
+                  buttonStateClass = "border-transparent bg-slate-50 text-slate-400 opacity-50 contrast-50";
                 }
               } else {
-                buttonClass += " border-slate-200 hover:border-orange-400 hover:bg-orange-50 text-slate-700";
+                buttonStateClass = "border-slate-100 bg-white hover:border-orange-200 hover:bg-orange-50/50 hover:shadow-md text-slate-700 shadow-sm";
               }
 
               return (
@@ -293,15 +306,18 @@ const ReviewChallenge: React.FC = () => {
                   key={index}
                   onClick={() => handleAnswer(option)}
                   disabled={selectedOption !== null}
-                  className={buttonClass}
+                  className={`${buttonBaseClass} ${buttonStateClass}`}
+                  style={{ animationDelay: `${index * 50}ms` }}
                 >
-                  {option}
-                  {selectedOption && isCorrectAnswer && (
-                    <CheckCircle2 className="inline-block ml-2 text-green-500" size={20} />
-                  )}
-                  {selectedOption && isSelected && !isCorrectAnswer && (
-                    <XCircle className="inline-block ml-2 text-red-500" size={20} />
-                  )}
+                  <div className="flex justify-between items-center relative z-10">
+                    <span>{option}</span>
+                    {selectedOption && isCorrectAnswer && (
+                        <CheckCircle2 className="text-green-600 animate-scale-in" size={24} />
+                    )}
+                    {selectedOption && isSelected && !isCorrectAnswer && (
+                        <XCircle className="text-red-500 animate-scale-in" size={24} />
+                    )}
+                  </div>
                 </button>
               );
             })}
@@ -309,52 +325,58 @@ const ReviewChallenge: React.FC = () => {
 
           {/* 結果と次へ */}
           {selectedOption && (
-            <div className="mt-auto">
-              <div className={`p-4 rounded-lg mb-4 ${isCorrect ? 'bg-green-50' : 'bg-red-50'}`}>
+            <div className="mt-auto animate-fade-in">
+              <div className={`p-5 rounded-xl mb-6 shadow-md border ${isCorrect ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    {isCorrect ? (
-                      <CheckCircle2 className="text-green-500" size={24} />
-                    ) : (
-                      <XCircle className="text-red-500" size={24} />
-                    )}
-                    <span className={`font-bold ${isCorrect ? 'text-green-700' : 'text-red-700'}`}>
-                      {isCorrect ? '正解！' : '不正解'}
-                    </span>
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-full ${isCorrect ? 'bg-green-200' : 'bg-red-200'}`}>
+                        {isCorrect ? (
+                        <CheckCircle2 className="text-green-700" size={24} />
+                        ) : (
+                        <XCircle className="text-red-700" size={24} />
+                        )}
+                    </div>
+                    <div>
+                        <span className={`text-lg font-extrabold ${isCorrect ? 'text-green-800' : 'text-red-800'}`}>
+                        {isCorrect ? 'Correct!' : 'Incorrect'}
+                        </span>
+                        {!isCorrect && (
+                        <p className="text-sm text-red-700 font-medium mt-1">
+                            Answer: <span className="font-bold">{currentWord.hungarian}</span>
+                        </p>
+                        )}
+                    </div>
                   </div>
                   <button
                     onClick={playAudio}
-                    className="p-2 rounded-full hover:bg-white/50"
+                    className="p-3 rounded-xl hover:bg-white/50 text-slate-500 hover:text-orange-600 transition-all border border-transparent hover:border-orange-200 hover:shadow-sm"
+                    title="Listen"
                   >
-                    <Volume2 size={20} className="text-slate-600" />
+                    <Volume2 size={24} />
                   </button>
                 </div>
-                {!isCorrect && (
-                  <p className="text-sm text-red-600 mt-2">
-                    正解: {currentWord.hungarian}
-                  </p>
-                )}
               </div>
 
               <button
                 onClick={handleNext}
-                className="w-full bg-orange-500 text-white font-bold py-3 rounded-lg hover:bg-orange-600 transition-colors flex items-center justify-center gap-2"
+                className="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-orange-200 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-lg"
+                autoFocus
               >
                 {currentIndex < quizWords.length - 1 ? (
                   <>
-                    次へ
+                    Next Question
                     <ArrowRight size={20} />
                   </>
                 ) : (
                   <>
-                    結果を見る
+                    Finish Challenge
                     <Trophy size={20} />
                   </>
                 )}
               </button>
             </div>
           )}
-        </>
+        </div>
       )}
     </div>
   );
