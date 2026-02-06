@@ -174,6 +174,14 @@ const Quiz: React.FC = () => {
       }
   };
 
+  useEffect(() => {
+    if (currentWord && quizMode === QuizMode.HuToJp) {
+        playAudio();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentWord]);
+
+
   if (loading || (quizItems.length === 0 && words.length > 0)) {
      // Show loading or empty state if needed
   }
