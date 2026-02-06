@@ -284,14 +284,18 @@ const Chat: React.FC = () => {
     if (segments && segments.length > 0) {
         const matchingSegment = segments.find(seg => seg.hungarian.toLowerCase().includes(cleanedWord));
         if (matchingSegment) {
-            extractedSentence = matchingSegment.hungarian.trim();
+            // Even if a segment is found, it might contain multiple sentences.
+            // We verify by trying to extract a more specific sentence from the segment text.
+            const refinedSentence = extractSentence(matchingSegment.hungarian, cleanedWord);
+            
+            extractedSentence = refinedSentence || matchingSegment.hungarian.trim();
             extractedTranslation = matchingSegment.japanese.trim();
         }
     } 
     
     // 2. Fallback to heuristic extraction if segments failed or missing
     if (!extractedSentence) {
-        extractedSentence = extractSentence(fullText, word);
+        extractedSentence = extractSentence(fullText, cleanedWord);
         // Translation fallback logic
         if (translationText && extractedSentence) {
             const huSentences = fullText.match(/[^.!?]+[.!?]+/g) || [fullText];
