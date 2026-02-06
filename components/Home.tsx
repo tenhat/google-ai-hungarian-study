@@ -1,8 +1,9 @@
 
-import React from 'react';
-import { View } from '../types';
+import React, { useState } from 'react';
+import { View, WordStatus } from '../types';
 import { useWordBank } from '../hooks/useWordBank';
 import { BrainCircuit, MessageSquare, CheckCircle, Clock, Star, Loader } from 'lucide-react';
+import WordList from './WordList';
 
 interface HomeProps {
   setCurrentView: (view: View) => void;
@@ -10,6 +11,8 @@ interface HomeProps {
 
 const Home: React.FC<HomeProps> = ({ setCurrentView }) => {
   const { getStats, getWordsForQuiz, loading } = useWordBank();
+  const [selectedStatus, setSelectedStatus] = useState<WordStatus | null>(null);
+  
   const stats = getStats();
   const dueWordsCount = getWordsForQuiz(100).length; // Get all due words
 
@@ -23,7 +26,7 @@ const Home: React.FC<HomeProps> = ({ setCurrentView }) => {
   }
 
   return (
-    <div className="flex-grow flex flex-col justify-center items-center p-4 space-y-8 animate-fade-in">
+    <div className="flex-grow flex flex-col justify-center items-center p-4 space-y-8 animate-fade-in relative">
       <div className="text-center animate-slide-up">
         <h2 className="text-3xl font-bold text-slate-800">Üdvözöljük!</h2>
         <p className="text-slate-500 mt-2">Welcome to your Hungarian learning dashboard.</p>
@@ -32,9 +35,27 @@ const Home: React.FC<HomeProps> = ({ setCurrentView }) => {
       <div className="w-full max-w-md bg-white p-6 rounded-xl shadow-xl border border-slate-100 space-y-4 animate-slide-up" style={{ animationDelay: '100ms' }}>
         <h3 className="text-lg font-bold text-center text-slate-700 border-b pb-2">学習状況</h3>
         <div className="grid grid-cols-3 gap-4 text-center">
-          <StatCard icon={<Star size={24} className="text-yellow-500" />} label="New" value={stats.newCount} delay="200ms" />
-          <StatCard icon={<Clock size={24} className="text-orange-500" />} label="Learning" value={stats.learningCount} delay="300ms" />
-          <StatCard icon={<CheckCircle size={24} className="text-green-500" />} label="Mastered" value={stats.masteredCount} delay="400ms" />
+          <StatCard 
+            icon={<Star size={24} className="text-yellow-500" />} 
+            label="New" 
+            value={stats.newCount} 
+            delay="200ms" 
+            onClick={() => setSelectedStatus(WordStatus.New)}
+          />
+          <StatCard 
+            icon={<Clock size={24} className="text-orange-500" />} 
+            label="Learning" 
+            value={stats.learningCount} 
+            delay="300ms" 
+            onClick={() => setSelectedStatus(WordStatus.Learning)}
+          />
+          <StatCard 
+            icon={<CheckCircle size={24} className="text-green-500" />} 
+            label="Mastered" 
+            value={stats.masteredCount} 
+            delay="400ms" 
+            onClick={() => setSelectedStatus(WordStatus.Mastered)}
+          />
         </div>
       </div>
 
@@ -57,6 +78,10 @@ const Home: React.FC<HomeProps> = ({ setCurrentView }) => {
           delay="600ms"
         />
       </div>
+
+      {selectedStatus && (
+        <WordList status={selectedStatus} onClose={() => setSelectedStatus(null)} />
+      )}
     </div>
   );
 };
@@ -67,11 +92,13 @@ interface StatCardProps {
     label: string;
     value: number;
     delay?: string;
+    onClick: () => void;
 }
 
-const StatCard: React.FC<StatCardProps> = ({ icon, label, value, delay }) => (
+const StatCard: React.FC<StatCardProps> = ({ icon, label, value, delay, onClick }) => (
     <div 
-      className="flex flex-col items-center p-2 rounded-lg hover:bg-slate-50 transition-colors animate-slide-up"
+      onClick={onClick}
+      className="flex flex-col items-center p-2 rounded-lg hover:bg-slate-50 cursor-pointer transition-all hover:scale-105 active:scale-95 animate-slide-up"
       style={{ animationDelay: delay, animationFillMode: 'backwards' }}
     >
         {icon}

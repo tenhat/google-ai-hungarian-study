@@ -14,6 +14,7 @@ interface WordBankContextType {
   getStats: () => { newCount: number, learningCount: number, masteredCount: number };
   loading: boolean;
   markAsMastered: (wordId: string) => void;
+  updateWord: (word: Word) => void;
 }
 
 const WordBankContext = createContext<WordBankContextType | undefined>(undefined);
@@ -401,7 +402,21 @@ export const WordBankProvider: React.FC<{ children: ReactNode }> = ({ children }
     }
   }, [progress, words, user]);
 
-  const contextValue = { words, progress, getWordById, getWordsForQuiz, getWordsForReviewChallenge, updateWordProgress, resetWordProgress, addNewWord, getStats, loading, markAsMastered };
+  const updateWord = useCallback((updatedWord: Word) => {
+    setWords(prevWords => prevWords.map(w => w.id === updatedWord.id ? updatedWord : w));
+    
+    // Sync to Firestore
+    if (user) {
+        const wordProgress = progress.get(updatedWord.id);
+        if (wordProgress) {
+            syncToFirestore(updatedWord, wordProgress);
+        }
+    } else {
+        // Local storage sync is handled by useEffect when 'words' changes
+    }
+  }, [progress, user]);
+
+  const contextValue = { words, progress, getWordById, getWordsForQuiz, getWordsForReviewChallenge, updateWordProgress, resetWordProgress, addNewWord, getStats, loading, markAsMastered, updateWord };
   return React.createElement(WordBankContext.Provider, { value: contextValue }, children);
 };
 
