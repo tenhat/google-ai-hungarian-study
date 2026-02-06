@@ -230,8 +230,8 @@ const Quiz: React.FC = () => {
                 </div>
                  {wordContext && <div className="text-xs text-blue-600 font-bold mb-2 tracking-wide bg-blue-50 inline-block px-1.5 py-0.5 rounded">{wordContext}</div>}
                 <div className="text-center py-2">
-                    <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">{quizMode === QuizMode.HuToJp ? 'ハンガリー語' : '日本語'}</p>
-                    <h2 className="text-3xl md:text-5xl font-extrabold text-slate-800 tracking-tight">{question}</h2>
+                    <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">{quizMode === QuizMode.HuToJp ? 'ハンガリー語' : '日本語'}</p>
+                    <h2 className="text-2xl md:text-4xl font-extrabold text-slate-800 tracking-tight leading-tight">{question}</h2>
                     {quizMode === QuizMode.HuToJp && (
                         <button 
                             onClick={playAudio}
@@ -241,11 +241,10 @@ const Quiz: React.FC = () => {
                         </button>
                     )}
                 </div>
-                {/* Only show example if word has one AND current item type is 'with_example' */}
                 {currentWord.example && currentItem.type === 'with_example' && (
-                  <div className="mt-4 p-3 bg-slate-50 rounded-lg border border-slate-100 max-w-md w-full text-center mx-auto animate-fade-in" style={{ animationDelay: '200ms' }}>
-                    <p className="text-base font-medium text-slate-700 mb-1 leading-relaxed">{highlightWordInSentence(currentWord.example.sentence, currentWord.hungarian)}</p>
-                    {selectedOption && <p className="text-xs text-slate-500 border-t border-slate-200 pt-1 mt-1">{currentWord.example.translation}</p>}
+                  <div className="mt-2 p-2 bg-slate-50 rounded-lg border border-slate-100 max-w-md w-full text-center mx-auto animate-fade-in" style={{ animationDelay: '200ms' }}>
+                    <p className="text-sm font-medium text-slate-700 mb-1 leading-relaxed">{highlightWordInSentence(currentWord.example.sentence, currentWord.hungarian)}</p>
+                    {selectedOption && <p className="text-[10px] text-slate-500 border-t border-slate-200 pt-1 mt-1">{currentWord.example.translation}</p>}
                   </div>
                 )}
             </div>
@@ -261,24 +260,24 @@ const Quiz: React.FC = () => {
                 </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-                {options.map((option, index) => (
-                    <button
-                        key={index}
-                        onClick={() => handleAnswer(option)}
-                        disabled={!!selectedOption}
-                        className={`p-3.5 rounded-lg text-base font-bold text-left transition-all duration-200 border-2
-                        ${selectedOption === null ? 'bg-white border-transparent shadow-sm hover:shadow-md hover:border-indigo-200 hover:scale-[1.01] active:scale-[0.99]' : ''}
-                        ${selectedOption !== null && option === correctAnswer ? 'bg-green-100 text-green-800 border-green-500 shadow-none' : ''}
-                        ${selectedOption === option && !isCorrect ? 'bg-red-100 text-red-800 border-red-500 shadow-none' : ''}
-                        ${selectedOption !== null && option !== correctAnswer && selectedOption !== option ? 'bg-slate-50 text-slate-400 border-transparent opacity-50' : ''}
-                        `}
-                        style={{ animationDelay: `${index * 50}ms` }}
-                    >
-                        {option}
-                    </button>
-                ))}
-            </div>
+            {/* 選択済みの場合は選択肢を非表示にする（結果表示スペース確保のため） */}
+            {!selectedOption && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+                    {options.map((option, index) => (
+                        <button
+                            key={index}
+                            onClick={() => handleAnswer(option)}
+                            disabled={!!selectedOption}
+                            className={`p-3.5 rounded-lg text-base font-bold text-left transition-all duration-200 border-2
+                            bg-white border-transparent shadow-sm hover:shadow-md hover:border-indigo-200 hover:scale-[1.01] active:scale-[0.99]
+                            `}
+                            style={{ animationDelay: `${index * 50}ms` }}
+                        >
+                            {option}
+                        </button>
+                    ))}
+                </div>
+            )}
 
             {!selectedOption && (
                 <div className="flex justify-center mt-4">
@@ -293,36 +292,36 @@ const Quiz: React.FC = () => {
             )}
 
             {selectedOption && (
-                <div className={`p-6 rounded-2xl flex flex-col md:flex-row items-center justify-between shadow-2xl animate-scale-in border-2 mt-4 
+                <div className={`p-4 rounded-xl flex flex-col items-center justify-between shadow-lg animate-scale-in border mt-2 
                     ${isCorrect 
                         ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200' 
                         : 'bg-gradient-to-r from-red-50 to-orange-50 border-red-200 animate-shake'
                     }`}>
-                    <div className="flex items-center gap-4 mb-4 md:mb-0 w-full md:w-auto">
-                        <div className={`p-3 rounded-full shadow-md ${isCorrect ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
-                            {isCorrect ? <Check size={28} strokeWidth={3} /> : <X size={28} strokeWidth={3} />}
+                    <div className="flex items-center gap-3 w-full mb-3">
+                        <div className={`p-2 rounded-full shadow-sm flex-shrink-0 ${isCorrect ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
+                            {isCorrect ? <Check size={20} strokeWidth={3} /> : <X size={20} strokeWidth={3} />}
                         </div>
-                        <div className="flex-1">
-                            <p className={`text-xl font-black ${isCorrect ? 'text-green-800' : 'text-red-800'}`}>
+                        <div className="flex-1 min-w-0">
+                            <p className={`text-lg font-black truncate ${isCorrect ? 'text-green-800' : 'text-red-800'}`}>
                                 {isCorrect ? '正解！' : '不正解...'}
                             </p>
                             {!isCorrect && (
-                                <p className="text-red-700 font-medium mt-1">
-                                    正解は: <span className="font-bold text-lg border-b-2 border-red-300 ml-1">{correctAnswer}</span>
+                                <p className="text-red-700 text-sm font-medium mt-0.5 truncate">
+                                    正解: <span className="font-bold border-b border-red-300 ml-1">{correctAnswer}</span>
                                 </p>
                             )}
                         </div>
                     </div>
                     <button 
                         onClick={handleNext} 
-                        className={`w-full md:w-auto font-bold py-3 px-8 rounded-xl shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2 text-base
+                        className={`w-full font-bold py-3 px-8 rounded-lg shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-sm
                             ${isCorrect 
-                                ? 'bg-green-600 hover:bg-green-700 text-white shadow-green-200' 
+                                ? 'bg-green-600 hover:bg-green-700 text-white shadow-green-100' 
                                 : 'bg-slate-800 hover:bg-slate-900 text-white'
                             }`}
                         autoFocus
                     >
-                        <span>次へ</span> <ArrowRight size={20} />
+                        <span>次へ</span> <ArrowRight size={18} />
                     </button>
                 </div>
             )}
