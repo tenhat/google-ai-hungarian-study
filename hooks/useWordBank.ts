@@ -16,6 +16,7 @@ interface WordBankContextType {
   markAsMastered: (wordId: string) => void;
   updateWord: (word: Word) => void;
   deleteWord: (wordId: string) => void;
+  markAsLearning: (wordId: string) => void;
 }
 
 const WordBankContext = createContext<WordBankContextType | undefined>(undefined);
@@ -403,6 +404,27 @@ export const WordBankProvider: React.FC<{ children: ReactNode }> = ({ children }
     }
   }, [progress, words, user]);
 
+  const markAsLearning = useCallback((wordId: string) => {
+    const currentProgress = progress.get(wordId);
+    if (!currentProgress) return;
+    const currentWord = words.find(w => w.id === wordId);
+    if (!currentWord) return;
+
+    const newProgress = { ...currentProgress };
+    newProgress.status = WordStatus.Learning;
+    newProgress.interval = 0;
+    newProgress.easiness = Math.max(INITIAL_EASINESS, newProgress.easiness - 0.2); // Sligthly decrease easiness
+    newProgress.repetitions = 0;
+    newProgress.nextReviewDate = new Date().toISOString(); // Review immediately
+
+    setProgress(new Map(progress.set(wordId, newProgress)));
+
+    // Sync
+    if (user) {
+        syncToFirestore(currentWord, newProgress);
+    }
+  }, [progress, words, user]);
+
   const updateWord = useCallback((updatedWord: Word) => {
     setWords(prevWords => prevWords.map(w => w.id === updatedWord.id ? updatedWord : w));
     
@@ -434,7 +456,7 @@ export const WordBankProvider: React.FC<{ children: ReactNode }> = ({ children }
     }
   }, [user]);
 
-  const contextValue = { words, progress, getWordById, getWordsForQuiz, getWordsForReviewChallenge, updateWordProgress, resetWordProgress, addNewWord, getStats, loading, markAsMastered, updateWord, deleteWord };
+  const contextValue = { words, progress, getWordById, getWordsForQuiz, getWordsForReviewChallenge, updateWordProgress, resetWordProgress, addNewWord, getStats, loading, markAsMastered, updateWord, deleteWord, markAsLearning };
   return React.createElement(WordBankContext.Provider, { value: contextValue }, children);
 };
 

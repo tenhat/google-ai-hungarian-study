@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Word, WordStatus } from '../types';
 import { useWordBank } from '../hooks/useWordBank';
-import { X, Edit2, Save, Volume2, Trash2, Check } from 'lucide-react';
+import { X, Edit2, Save, Volume2, Trash2, Check, RefreshCw } from 'lucide-react';
 
 interface WordListProps {
   status: WordStatus;
@@ -21,7 +21,7 @@ const statusLabels = {
 };
 
 const WordList: React.FC<WordListProps> = ({ status, onClose }) => {
-  const { words, progress, updateWord, deleteWord, markAsMastered } = useWordBank();
+  const { words, progress, updateWord, deleteWord, markAsMastered, markAsLearning } = useWordBank();
   const [editingWord, setEditingWord] = useState<Word | null>(null);
   const [deletingWord, setDeletingWord] = useState<Word | null>(null);
 
@@ -114,6 +114,15 @@ const WordList: React.FC<WordListProps> = ({ status, onClose }) => {
                                         title="Mark as Mastered"
                                     >
                                         <Check size={18} />
+                                    </button>
+                                )}
+                                {status === WordStatus.Mastered && (
+                                    <button
+                                        onClick={() => markAsLearning(word.id)}
+                                        className="text-slate-400 hover:text-orange-600 p-2 hover:bg-orange-50 rounded-lg transition-colors ml-1"
+                                        title="学習中に戻す"
+                                    >
+                                        <RefreshCw size={18} />
                                     </button>
                                 )}
                                 <button 
