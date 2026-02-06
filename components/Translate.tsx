@@ -1,15 +1,69 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { getTranslation, getWordTranslation } from '../services/geminiService';
 import { TranslationResult } from '../types';
-import { Languages, Send, Loader2, BookOpen, ListChecks } from 'lucide-react';
+import { Languages, Send, Loader2, BookOpen, ListChecks, Mic, MicOff } from 'lucide-react';
 import { useWordBank } from '../hooks/useWordBank';
+
+// Web Speech API の型定義
+interface SpeechRecognitionEvent extends Event {
+  results: SpeechRecognitionResultList;
+  resultIndex: number;
+}
+
+interface SpeechRecognitionResultList {
+  length: number;
+  item(index: number): SpeechRecognitionResult;
+  [index: number]: SpeechRecognitionResult;
+}
+
+interface SpeechRecognitionResult {
+  isFinal: boolean;
+  length: number;
+  item(index: number): SpeechRecognitionAlternative;
+  [index: number]: SpeechRecognitionAlternative;
+}
+
+interface SpeechRecognitionAlternative {
+  transcript: string;
+  confidence: number;
+}
+
+interface SpeechRecognitionErrorEvent extends Event {
+  error: string;
+  message: string;
+}
+
+interface SpeechRecognitionInstance extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onstart: (() => void) | null;
+  onend: (() => void) | null;
+  onerror: ((event: SpeechRecognitionErrorEvent) => void) | null;
+  onresult: ((event: SpeechRecognitionEvent) => void) | null;
+  start: () => void;
+  stop: () => void;
+  abort: () => void;
+}
+
+declare global {
+  interface Window {
+    SpeechRecognition: new () => SpeechRecognitionInstance;
+    webkitSpeechRecognition: new () => SpeechRecognitionInstance;
+  }
+}
 
 const Translate: React.FC = () => {
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<TranslationResult | null>(null);
   const { addNewWord } = useWordBank();
+
+  // 音声入力用State
+  const [isListening, setIsListening] = useState(false);
+  const [speechSupported, setSpeechSupported] = useState(false);
+  const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
 
   // モーダル用State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -18,6 +72,72 @@ const Translate: React.FC = () => {
   const [exampleSentence, setExampleSentence] = useState('');
   const [exampleTranslation, setExampleTranslation] = useState('');
   const [isTranslating, setIsTranslating] = useState(false);
+
+  // 音声認識の初期化
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      setSpeechSupported(true);
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.lang = 'ja-JP'; // 日本語認識
+
+      recognition.onstart = () => {
+        setIsListening(true);
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+        console.error('音声認識エラー:', event.error);
+        setIsListening(false);
+      };
+
+      recognition.onresult = (event: SpeechRecognitionEvent) => {
+        let finalTranscript = '';
+        let interimTranscript = '';
+
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript;
+          } else {
+            interimTranscript += transcript;
+          }
+        }
+
+        if (finalTranscript) {
+          setInputText(prev => prev + finalTranscript);
+        }
+      };
+
+      recognitionRef.current = recognition;
+    }
+
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.abort();
+      }
+    };
+  }, []);
+
+  // 音声入力の開始/停止
+  const toggleListening = () => {
+    if (!recognitionRef.current) return;
+
+    if (isListening) {
+      recognitionRef.current.stop();
+    } else {
+      try {
+        recognitionRef.current.start();
+      } catch (error) {
+        console.error('音声認識の開始に失敗:', error);
+      }
+    }
+  };
 
   const handleTranslate = async () => {
     if (!inputText.trim() || isLoading) return;
@@ -121,14 +241,38 @@ const Translate: React.FC = () => {
 
       {/* 入力エリア */}
       <div className="p-4 border-b border-slate-200">
-        <textarea
-          value={inputText}
-          onChange={(e) => setInputText(e.target.value)}
-          placeholder="日本語を入力してください..."
-          className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none"
-          rows={3}
-          disabled={isLoading}
-        />
+        <div className="relative">
+          <textarea
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+            placeholder="日本語を入力してください..."
+            className="w-full p-3 pr-12 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none"
+            rows={3}
+            disabled={isLoading || isListening}
+          />
+          {/* 音声入力ボタン */}
+          {speechSupported && (
+            <button
+              onClick={toggleListening}
+              disabled={isLoading}
+              className={`absolute right-2 bottom-2 p-2 rounded-full transition-all duration-200 ${
+                isListening
+                  ? 'bg-red-500 text-white animate-pulse shadow-lg'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              } disabled:opacity-50`}
+              title={isListening ? '音声入力を停止' : '音声で入力'}
+            >
+              {isListening ? <MicOff size={20} /> : <Mic size={20} />}
+            </button>
+          )}
+        </div>
+        {/* 音声入力中の表示 */}
+        {isListening && (
+          <div className="mt-2 flex items-center gap-2 text-red-500 text-sm">
+            <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+            音声を聞き取り中... 日本語で話してください
+          </div>
+        )}
         <button
           onClick={handleTranslate}
           disabled={isLoading || !inputText.trim()}
