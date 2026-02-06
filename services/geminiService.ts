@@ -245,33 +245,41 @@ Use vocabulary appropriate for a beginner-to-intermediate learner. Do not use ma
 }
 
 /**
- * 日本語テキストをハンガリー語に翻訳し、活用解説と重要単語を返す
- * @param japaneseText - 翻訳する日本語テキスト
+ * テキストを翻訳し、解説と重要単語を返す
+ * @param text - 翻訳するテキスト
+ * @param direction - 翻訳方向 ('ja_to_hu' | 'hu_to_ja')
  */
-export async function getTranslation(japaneseText: string): Promise<TranslationResult> {
-    const prompt = `You are a Hungarian language expert. Translate the following Japanese text into Hungarian.
+export async function getTranslation(text: string, direction: 'ja_to_hu' | 'hu_to_ja' = 'ja_to_hu'): Promise<TranslationResult> {
+    const isJaToHu = direction === 'ja_to_hu';
+    
+    // プロンプトの切り替え
+    const systemInstruction = isJaToHu
+        ? `You are a Hungarian language expert. Translate the following Japanese text into Hungarian.`
+        : `You are a Hungarian language expert. Translate the following Hungarian text into Japanese.`;
 
-Japanese text: "${japaneseText}"
+    const explanationInstruction = isJaToHu
+        ? `"explanation": "簡潔な文法ポイントを1-2行で説明（例：動詞の活用形、格語尾など重要な点のみ）",`
+        : `"explanation": "Briefly explain the grammar points of the original Hungarian text in Japanese (1-2 lines), focusing on key aspects like conjugation or cases.",`;
+
+    const wordInstruction = isJaToHu
+        ? `"importantWords": [{"hungarian": "word1", "japanese": "meaning1", "example": {"sentence": "Example sentence", "translation": "日本語訳"}}]`
+        : `"importantWords": [{"hungarian": "word1 (from original text)", "japanese": "meaning1", "example": {"sentence": "Example sentence", "translation": "日本語訳"}}]`;
+
+    const prompt = `${systemInstruction}
+
+Text to translate: "${text}"
 
 Return a JSON object with the following structure:
 {
-  "hungarian": "The Hungarian translation of the text",
-  "explanation": "簡潔な文法ポイントを1-2行で説明（例：動詞の活用形、格語尾など重要な点のみ）",
-  "importantWords": [
-    {
-      "hungarian": "word1",
-      "japanese": "meaning1",
-      "example": {
-        "sentence": "Example sentence using the word",
-        "translation": "日本語訳"
-      }
-    }
-  ]
+  "hungarian": "${isJaToHu ? "The Hungarian translation" : "The original Hungarian text (echo back)"}",
+  "japanese": "${isJaToHu ? "The original Japanese text (echo back)" : "The Japanese translation"}", 
+  ${explanationInstruction}
+  ${wordInstruction}
 }
 
 Important notes:
 - The explanation should be BRIEF (1-2 lines max) in Japanese, focusing only on the most important grammar point
-- Include 2-3 important words that appear in the translation
+- Include 2-3 important words that appear in the text
 - Each important word should have a realistic example sentence
 - Do not use markdown formatting`;
 
@@ -291,10 +299,29 @@ Important notes:
         }
 
         const parsed = JSON.parse(responseText);
+        
+        // レスポンスの形式を合わせる
+        // ja_to_hu の場合は従来通り hungarian に翻訳結果を入れる
+        // hu_to_ja の場合は japanese に翻訳結果が入るが、UI側は hungarian を翻訳結果として表示している可能性があるため調整が必要
+        // しかし、型定義を変えずに対応するため、TranslationResult の意味合いを少し柔軟にする
+        // ja_to_hu: hungarian=翻訳結果(HU)
+        // hu_to_ja: hungarian=入力テキスト(HU), japanese=翻訳結果(JA) としたいが、
+        // 既存UIは hungarian プロパティをメインの表示に使っているため、
+        // hu_to_ja の場合、UI側で japanese プロパティを表示するように改修するか、
+        // ここで返す値を工夫する。
+        // 今回はUI側も改修するため、必要なデータを素直に返す。
+        
         return {
-            hungarian: parsed.hungarian || "",
+            hungarian: parsed.hungarian || text, // ハンガリー語テキスト（翻訳結果 or 原文）
             explanation: parsed.explanation || "",
-            importantWords: parsed.importantWords || []
+            importantWords: parsed.importantWords || [],
+            // 拡張: 日本語訳も含める（既存の型定義にはないかもしれないが、JSONパースで含まれる）
+            // 型定義を修正する必要があるかもしれないが、まずは既存の構造に合わせて返す
+            // hu_to_ja の場合、UIで日本語を表示するために explanation 内に含めるか、
+            // 別途 UI で japanese プロパティを参照するように型を拡張するのがベスト。
+            // ここではとりあえず parsed オブジェクト全体を返すつもりで、
+            // 型定義 TranslationResult に japanese プロパティを追加することを推奨。
+            ...parsed
         };
     } catch (error) {
         console.error("Error getting translation:", error);

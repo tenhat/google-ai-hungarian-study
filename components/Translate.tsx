@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { getTranslation, getWordTranslation } from '../services/geminiService';
 import { TranslationResult } from '../types';
-import { Languages, Send, Loader2, BookOpen, ListChecks, Mic, MicOff } from 'lucide-react';
+import { Languages, Send, Loader2, BookOpen, ListChecks, Mic, MicOff, ArrowRightLeft } from 'lucide-react';
 import { useWordBank } from '../hooks/useWordBank';
 
 // Web Speech API の型定義
@@ -58,6 +58,7 @@ const Translate: React.FC = () => {
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<TranslationResult | null>(null);
+  const [direction, setDirection] = useState<'ja_to_hu' | 'hu_to_ja'>('ja_to_hu');
   const { addNewWord } = useWordBank();
 
   // 音声入力用State
@@ -81,7 +82,7 @@ const Translate: React.FC = () => {
       const recognition = new SpeechRecognition();
       recognition.continuous = false;
       recognition.interimResults = true;
-      recognition.lang = 'ja-JP'; // 日本語認識
+      recognition.lang = direction === 'ja_to_hu' ? 'ja-JP' : 'hu-HU'; // 言語切り替え
 
       recognition.onstart = () => {
         setIsListening(true);
@@ -122,11 +123,16 @@ const Translate: React.FC = () => {
         recognitionRef.current.abort();
       }
     };
-  }, []);
+  }, [direction]); // direction が変わったら再設定
 
   // 音声入力の開始/停止
   const toggleListening = () => {
     if (!recognitionRef.current) return;
+    
+    // 現在の言語設定を確実に反映
+    if (!isListening) {
+        recognitionRef.current.lang = direction === 'ja_to_hu' ? 'ja-JP' : 'hu-HU';
+    }
 
     if (isListening) {
       recognitionRef.current.stop();
@@ -146,13 +152,20 @@ const Translate: React.FC = () => {
     setResult(null);
 
     try {
-      const translationResult = await getTranslation(inputText);
+      const translationResult = await getTranslation(inputText, direction);
       setResult(translationResult);
     } catch (error) {
       console.error('Translation error:', error);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // 言語切り替え
+  const toggleDirection = () => {
+    setDirection(prev => prev === 'ja_to_hu' ? 'hu_to_ja' : 'ja_to_hu');
+    setResult(null);
+    setInputText('');
   };
 
   // ハンガリー語単語をクリック可能にする関数
@@ -231,12 +244,23 @@ const Translate: React.FC = () => {
     }
   };
 
-  return (
+    return (
     <div className="flex flex-col h-full max-h-[80vh] bg-white rounded-xl shadow-lg border border-slate-200 relative">
       {/* ヘッダー */}
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-200">
-        <Languages className="text-blue-600" size={24} />
-        <h2 className="text-lg font-bold text-slate-800">日本語 → ハンガリー語</h2>
+      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200">
+        <div className="flex items-center gap-2">
+          <Languages className="text-blue-600" size={24} />
+          <h2 className="text-lg font-bold text-slate-800">
+            {direction === 'ja_to_hu' ? '日本語 → ハンガリー語' : 'ハンガリー語 → 日本語'}
+          </h2>
+        </div>
+        <button
+          onClick={toggleDirection}
+          className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
+          title="入れ替える"
+        >
+          <ArrowRightLeft size={20} />
+        </button>
       </div>
 
       {/* 入力エリア */}
@@ -245,7 +269,7 @@ const Translate: React.FC = () => {
           <textarea
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
-            placeholder="日本語を入力してください..."
+            placeholder={direction === 'ja_to_hu' ? "日本語を入力してください..." : "ハンガリー語を入力してください..."}
             className="w-full p-3 pr-12 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none"
             rows={3}
             disabled={isLoading || isListening}
@@ -270,7 +294,7 @@ const Translate: React.FC = () => {
         {isListening && (
           <div className="mt-2 flex items-center gap-2 text-red-500 text-sm">
             <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
-            音声を聞き取り中... 日本語で話してください
+            音声を聞き取り中... ({direction === 'ja_to_hu' ? '日本語' : 'ハンガリー語'})
           </div>
         )}
         <button
@@ -296,14 +320,19 @@ const Translate: React.FC = () => {
       <div className="flex-grow p-4 overflow-y-auto space-y-4">
         {result && (
           <>
-            {/* ハンガリー語翻訳 */}
+            {/* 翻訳結果 */}
             <div className="bg-blue-50 p-4 rounded-lg">
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-lg">🇭🇺</span>
-                <h3 className="font-bold text-blue-800">ハンガリー語翻訳</h3>
+                <span className="text-lg">{direction === 'ja_to_hu' ? '🇭🇺' : '🇯🇵'}</span>
+                <h3 className="font-bold text-blue-800">
+                    {direction === 'ja_to_hu' ? 'ハンガリー語翻訳' : '日本語翻訳'}
+                </h3>
               </div>
               <p className="text-lg text-slate-800">
-                {renderClickableText(result.hungarian, result.hungarian, inputText)}
+                {direction === 'ja_to_hu' 
+                    ? renderClickableText(result.hungarian, result.hungarian, inputText)
+                    : (result.japanese || result.explanation) /* フォールバック */
+                }
               </p>
             </div>
 
@@ -355,7 +384,7 @@ const Translate: React.FC = () => {
         {!result && !isLoading && (
           <div className="flex flex-col items-center justify-center h-full text-slate-400">
             <Languages size={48} className="mb-4" />
-            <p>日本語を入力して翻訳してください</p>
+            <p>{direction === 'ja_to_hu' ? '日本語を入力して翻訳してください' : 'ハンガリー語を入力して翻訳してください'}</p>
           </div>
         )}
       </div>

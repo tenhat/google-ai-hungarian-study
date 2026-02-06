@@ -60,6 +60,8 @@ export interface Correction {
 
 export interface TranslationResult {
   hungarian: string;           // ハンガリー語翻訳
+  japanese?: string;           // 日本語翻訳（ハンガリー語→日本語翻訳時に使用）
+
   explanation: string;         // 活用・文法解説
   importantWords: {
     hungarian: string;
