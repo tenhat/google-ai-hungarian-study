@@ -120,6 +120,7 @@ const Quiz: React.FC = () => {
     const wasCorrect = option === correctAnswer;
     setIsCorrect(wasCorrect);
     updateWordProgress(currentWord.id, wasCorrect);
+    playAudio();
   };
 
   const handleMastered = () => {
