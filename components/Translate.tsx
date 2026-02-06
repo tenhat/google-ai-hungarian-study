@@ -245,18 +245,20 @@ const Translate: React.FC = () => {
   };
 
     return (
-    <div className="flex flex-col h-full max-h-[80vh] bg-white rounded-xl shadow-lg border border-slate-200 relative">
+    <div className="flex flex-col h-full max-h-[80vh] bg-white rounded-xl shadow-xl border border-slate-200 relative overflow-hidden transition-all duration-300">
       {/* ヘッダー */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200">
-        <div className="flex items-center gap-2">
-          <Languages className="text-blue-600" size={24} />
-          <h2 className="text-lg font-bold text-slate-800">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-indigo-100 rounded-lg">
+            <Languages className="text-indigo-600" size={24} />
+          </div>
+          <h2 className="text-lg font-bold text-slate-800 tracking-tight">
             {direction === 'ja_to_hu' ? '日本語 → ハンガリー語' : 'ハンガリー語 → 日本語'}
           </h2>
         </div>
         <button
           onClick={toggleDirection}
-          className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
+          className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-all duration-300 transform hover:rotate-180 active:scale-95"
           title="入れ替える"
         >
           <ArrowRightLeft size={20} />
@@ -264,13 +266,13 @@ const Translate: React.FC = () => {
       </div>
 
       {/* 入力エリア */}
-      <div className="p-4 border-b border-slate-200">
+      <div className="p-5 border-b border-slate-100 bg-white group focus-within:bg-slate-50/30 transition-colors">
         <div className="relative">
           <textarea
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             placeholder={direction === 'ja_to_hu' ? "日本語を入力してください..." : "ハンガリー語を入力してください..."}
-            className="w-full p-3 pr-12 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none"
+            className="w-full p-4 pr-14 border border-slate-200 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 focus:outline-none resize-none bg-slate-50 focus:bg-white shadow-sm transition-all text-lg leading-relaxed text-slate-700 placeholder:text-slate-400"
             rows={3}
             disabled={isLoading || isListening}
           />
@@ -279,11 +281,11 @@ const Translate: React.FC = () => {
             <button
               onClick={toggleListening}
               disabled={isLoading}
-              className={`absolute right-2 bottom-2 p-2 rounded-full transition-all duration-200 ${
+              className={`absolute right-3 bottom-3 p-2.5 rounded-full transition-all duration-200 shadow-sm border ${
                 isListening
-                  ? 'bg-red-500 text-white animate-pulse shadow-lg'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-              } disabled:opacity-50`}
+                  ? 'bg-red-500 text-white animate-pulse-subtle border-red-400 ring-4 ring-red-100'
+                  : 'bg-white text-slate-500 border-slate-200 hover:border-indigo-300 hover:text-indigo-600 hover:shadow-md hover:scale-105'
+              } disabled:opacity-50 disabled:hover:scale-100`}
               title={isListening ? '音声入力を停止' : '音声で入力'}
             >
               {isListening ? <MicOff size={20} /> : <Mic size={20} />}
@@ -292,15 +294,15 @@ const Translate: React.FC = () => {
         </div>
         {/* 音声入力中の表示 */}
         {isListening && (
-          <div className="mt-2 flex items-center gap-2 text-red-500 text-sm">
-            <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+          <div className="mt-3 flex items-center gap-2 text-red-500 text-sm font-medium animate-fade-in pl-1">
+            <span className="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse"></span>
             音声を聞き取り中... ({direction === 'ja_to_hu' ? '日本語' : 'ハンガリー語'})
           </div>
         )}
         <button
           onClick={handleTranslate}
           disabled={isLoading || !inputText.trim()}
-          className="mt-3 w-full bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg shadow hover:bg-blue-700 disabled:bg-slate-400 transition-colors flex items-center justify-center gap-2"
+          className="mt-4 w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3.5 px-6 rounded-xl shadow-md hover:shadow-xl hover:shadow-indigo-200 hover:-translate-y-0.5 disabled:from-slate-400 disabled:to-slate-400 disabled:shadow-none disabled:translate-y-0 transition-all duration-300 flex items-center justify-center gap-2.5 tracking-wide active:scale-98"
         >
           {isLoading ? (
             <>
@@ -309,7 +311,7 @@ const Translate: React.FC = () => {
             </>
           ) : (
             <>
-              <Send size={20} />
+              <Send size={20} className="transform -rotate-45" />
               翻訳する
             </>
           )}
@@ -319,16 +321,16 @@ const Translate: React.FC = () => {
       {/* 結果表示エリア */}
       <div className="flex-grow p-4 overflow-y-auto space-y-4">
         {result && (
-          <>
+          <div className="space-y-6 pb-6 w-full">
             {/* 翻訳結果 */}
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-lg">{direction === 'ja_to_hu' ? '🇭🇺' : '🇯🇵'}</span>
-                <h3 className="font-bold text-blue-800">
+            <div className="bg-white p-5 rounded-xl shadow-sm border-l-4 border-indigo-500 animate-slide-up ring-1 ring-slate-100">
+              <div className="flex items-center gap-3 mb-3">
+                <span className="text-2xl filter drop-shadow-sm">{direction === 'ja_to_hu' ? '🇭🇺' : '🇯🇵'}</span>
+                <h3 className="font-bold text-indigo-900 text-lg">
                     {direction === 'ja_to_hu' ? 'ハンガリー語翻訳' : '日本語翻訳'}
                 </h3>
               </div>
-              <p className="text-lg text-slate-800">
+              <p className="text-xl text-slate-800 leading-relaxed font-medium">
                 {direction === 'ja_to_hu' 
                     ? renderClickableText(result.hungarian, result.hungarian, inputText)
                     : (result.japanese || result.explanation) /* フォールバック */
@@ -337,48 +339,56 @@ const Translate: React.FC = () => {
             </div>
 
             {/* 活用・文法解説 */}
-            <div className="bg-purple-50 p-4 rounded-lg">
-              <div className="flex items-center gap-2 mb-2">
-                <BookOpen className="text-purple-600" size={20} />
-                <h3 className="font-bold text-purple-800">活用・文法解説</h3>
+            <div className="bg-white p-5 rounded-xl shadow-sm border-l-4 border-fuchsia-500 animate-slide-up ring-1 ring-slate-100" style={{ animationDelay: '100ms', animationFillMode: 'backwards' }}>
+              <div className="flex items-center gap-2.5 mb-3">
+                <div className="p-1.5 bg-fuchsia-100 rounded-lg">
+                  <BookOpen className="text-fuchsia-600" size={20} />
+                </div>
+                <h3 className="font-bold text-fuchsia-900">活用・文法解説</h3>
               </div>
-              <p className="text-slate-700 whitespace-pre-wrap">
+              <p className="text-slate-700 whitespace-pre-wrap leading-relaxed text-base">
                 {renderClickableText(result.explanation, result.hungarian, inputText)}
               </p>
             </div>
 
             {/* 重要単語 */}
             {result.importantWords.length > 0 && (
-              <div className="bg-green-50 p-4 rounded-lg">
-                <div className="flex items-center gap-2 mb-3">
-                  <ListChecks className="text-green-600" size={20} />
-                  <h3 className="font-bold text-green-800">重要単語</h3>
+              <div className="bg-white p-5 rounded-xl shadow-sm border-l-4 border-emerald-500 animate-slide-up ring-1 ring-slate-100" style={{ animationDelay: '200ms', animationFillMode: 'backwards' }}>
+                <div className="flex items-center gap-2.5 mb-4">
+                  <div className="p-1.5 bg-emerald-100 rounded-lg">
+                    <ListChecks className="text-emerald-600" size={20} />
+                  </div>
+                  <h3 className="font-bold text-emerald-900">重要単語</h3>
                 </div>
                 <div className="space-y-3">
                   {result.importantWords.map((word, index) => (
                     <div
                       key={index}
-                      className="bg-white p-3 rounded-lg border border-green-200"
+                      className="bg-slate-50/80 p-4 rounded-xl border border-slate-200 hover:border-emerald-300 transition-colors animate-scale-in"
+                      style={{ animationDelay: `${250 + index * 50}ms`, animationFillMode: 'backwards' }}
                     >
-                      <div className="flex items-baseline gap-2 mb-1">
-                        <span className="font-bold text-green-700">
+                      <div className="flex items-baseline gap-3 mb-1.5 flex-wrap">
+                        <span className="font-bold text-emerald-700 text-lg">
                           {renderClickableText(word.hungarian, word.example.sentence, word.example.translation)}
                         </span>
-                        <span className="text-slate-600">→</span>
-                        <span className="text-slate-800">{word.japanese}</span>
+                        <span className="text-slate-400">→</span>
+                        <span className="text-slate-800 font-medium">{word.japanese}</span>
                       </div>
-                      <p className="text-sm text-slate-600">
-                        例: {renderClickableText(word.example.sentence, word.example.sentence, word.example.translation)}
-                      </p>
-                      <p className="text-sm text-slate-500">
-                        {word.example.translation}
-                      </p>
+                      <div className="bg-white p-3 rounded-lg border border-slate-100 mt-2">
+                        <p className="text-sm text-slate-700 mb-1">
+                          <span className="text-slate-400 mr-2 text-xs uppercase tracking-wider font-bold">Example</span>
+                          {renderClickableText(word.example.sentence, word.example.sentence, word.example.translation)}
+                        </p>
+                        <p className="text-sm text-slate-500 pl-8">
+                          {word.example.translation}
+                        </p>
+                      </div>
                     </div>
                   ))}
                 </div>
               </div>
             )}
-          </>
+          </div>
         )}
 
         {!result && !isLoading && (

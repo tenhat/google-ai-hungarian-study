@@ -43,8 +43,10 @@ const App: React.FC = () => {
       <WordBankProvider>
         <div className="min-h-screen bg-slate-100 flex flex-col">
         <Header />
-        <main className="flex-grow container mx-auto p-4 flex flex-col">
-          {renderView()}
+        <main className="flex-grow container mx-auto p-4 flex flex-col relative">
+          <div key={currentView} className="flex-col flex flex-grow animate-fade-in">
+            {renderView()}
+          </div>
         </main>
         <nav className="sticky bottom-0 bg-white shadow-t border-t border-slate-200">
           <div className="container mx-auto flex justify-around p-2">
