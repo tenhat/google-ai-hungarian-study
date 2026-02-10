@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useWordBank } from '../hooks/useWordBank';
 import { Word } from '../types';
 import { Trophy, RefreshCw, Volume2, ArrowRight, CheckCircle2, XCircle, Target, Play } from 'lucide-react';
+import confetti from 'canvas-confetti';
 
 const STORAGE_KEY = 'review-challenge-progress';
 
@@ -121,9 +122,18 @@ const ReviewChallenge: React.FC = () => {
     const wasCorrect = option === correctAnswer;
     setIsCorrect(wasCorrect);
 
+    // 回答時にも音声を再生
+    playAudio();
+
     if (wasCorrect) {
       setCorrectCount(prev => prev + 1);
-      // 正解時は何もしない（間隔維持）
+      // 正解演出
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#22c55e', '#3b82f6', '#fbbf24', '#f87171']
+      });
     } else {
       setIncorrectCount(prev => prev + 1);
       // 不正解時は間隔リセット
@@ -139,14 +149,42 @@ const ReviewChallenge: React.FC = () => {
     } else {
       setIsFinished(true);
     }
+    // 画面を一番上にスクロール
+    window.scrollTo(0, 0);
   };
 
   const playAudio = () => {
     if (!currentWord) return;
-    const utterance = new SpeechSynthesisUtterance(currentWord.hungarian);
-    utterance.lang = 'hu-HU';
-    window.speechSynthesis.speak(utterance);
+
+    const speak = () => {
+        const utterance = new SpeechSynthesisUtterance(currentWord.hungarian);
+        utterance.lang = 'hu-HU';
+        
+        // Explicitly find and set Hungarian voice
+        const voices = window.speechSynthesis.getVoices();
+        // Try exact match first, then prefix match
+        const huVoice = voices.find(v => v.lang === 'hu-HU' || v.lang === 'hu_HU') || 
+                        voices.find(v => v.lang.startsWith('hu'));
+                        
+        if (huVoice) {
+            utterance.voice = huVoice;
+        }
+
+        window.speechSynthesis.speak(utterance);
+    };
+
+    // Chrome/iOS requires handling async voice loading
+    if (window.speechSynthesis.getVoices().length === 0) {
+        window.speechSynthesis.onvoiceschanged = () => {
+            speak();
+            window.speechSynthesis.onvoiceschanged = null;
+        };
+    } else {
+        speak();
+    }
   };
+
+
 
   // 開始前の画面
   if (!hasStarted) {
