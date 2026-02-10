@@ -4,10 +4,11 @@ import Quiz from './components/Quiz';
 import Chat from './components/Chat';
 import Translate from './components/Translate';
 import ReviewChallenge from './components/ReviewChallenge';
+import ListeningMode from './components/ListeningMode';
 import { WordBankProvider } from './hooks/useWordBank';
 import { View } from './types';
 import Header from './components/shared/Header';
-import { BrainCircuit, MessageSquare, HomeIcon, Languages, Target } from 'lucide-react';
+import { BrainCircuit, MessageSquare, HomeIcon, Languages, Target, Headphones } from 'lucide-react';
 
 import { AuthProvider } from './contexts/AuthContext';
 
@@ -32,6 +33,8 @@ const App: React.FC = () => {
         return <Translate />;
       case View.ReviewChallenge:
         return <ReviewChallenge />;
+      case View.ListeningMode:
+        return <ListeningMode />;
       case View.Home:
       default:
         return <Home setCurrentView={handleViewChange} />;
@@ -70,6 +73,13 @@ const App: React.FC = () => {
             >
               <Target size={24} />
               <span className="text-xs font-medium">復習</span>
+            </button>
+            <button
+              onClick={() => handleViewChange(View.ListeningMode)}
+              className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-colors ${currentView === View.ListeningMode ? 'text-teal-500' : 'text-slate-500 hover:bg-slate-100'}`}
+            >
+              <Headphones size={24} />
+              <span className="text-xs font-medium">聞き流し</span>
             </button>
             <button
               onClick={() => handleViewChange(View.Translate)}

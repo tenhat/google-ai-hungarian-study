@@ -77,6 +77,22 @@ const Home: React.FC<HomeProps> = ({ setCurrentView }) => {
           className="bg-gradient-to-br from-purple-600 to-fuchsia-600 hover:shadow-purple-200"
           delay="600ms"
         />
+        <ActionButton
+          icon={<BrainCircuit size={32} className="rotate-180" />}
+          title="復習チャレンジ"
+          subtitle="4択スピードクイズ"
+          onClick={() => setCurrentView(View.ReviewChallenge)}
+          className="bg-gradient-to-br from-orange-500 to-amber-500 hover:shadow-orange-200"
+          delay="700ms"
+        />
+        <ActionButton
+          icon={<Clock size={32} />}
+          title="聞き流し"
+          subtitle="自動再生・暗記"
+          onClick={() => setCurrentView(View.ListeningMode)}
+          className="bg-gradient-to-br from-teal-500 to-emerald-500 hover:shadow-teal-200"
+          delay="800ms"
+        />
       </div>
 
       {selectedStatus && (

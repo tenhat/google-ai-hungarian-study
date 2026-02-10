@@ -34,6 +34,7 @@ export enum View {
   Chat = 'Chat',
   Translate = 'Translate',
   ReviewChallenge = 'ReviewChallenge',
+  ListeningMode = 'ListeningMode',
 }
 
 export enum QuizMode {
