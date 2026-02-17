@@ -2,9 +2,12 @@ import React from 'react';
 import { BookMarked, LogIn, LogOut, User, Globe } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTokens } from '../../hooks/useTokens';
+import { Coins } from 'lucide-react';
 
 const Header: React.FC = () => {
   const { user, signInWithGoogle, logout } = useAuth();
+  const { totalRemaining, loading: tokensLoading } = useTokens();
   const { t, i18n } = useTranslation();
 
   const toggleLanguage = () => {
@@ -34,6 +37,12 @@ const Header: React.FC = () => {
 
             {user ? (
                 <div className="flex items-center gap-3">
+                    {!tokensLoading && (
+                        <div className="flex items-center gap-1.5 bg-amber-100 text-amber-700 px-3 py-1.5 rounded-full mr-1 shadow-sm border border-amber-200">
+                            <Coins size={16} className="fill-amber-500 text-amber-600" />
+                            <span className="text-sm font-bold min-w-[1.5rem] text-center">{totalRemaining}</span>
+                        </div>
+                    )}
                     <div className="flex items-center gap-2">
                         {user.photoURL ? (
                             <img src={user.photoURL} alt={user.displayName || "User"} className="w-8 h-8 rounded-full border border-slate-200" />

@@ -1,9 +1,8 @@
 
 import React, { useState } from 'react';
-import { View, WordStatus, FREE_TOKEN_MONTHLY_LIMIT } from '../types';
+import { View, WordStatus } from '../types';
 import { useWordBank } from '../hooks/useWordBank';
-import { useTokens } from '../hooks/useTokens';
-import { BrainCircuit, MessageSquare, CheckCircle, Clock, Star, Loader, Coins } from 'lucide-react';
+import { BrainCircuit, MessageSquare, CheckCircle, Clock, Star, Loader } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import WordList from './WordList';
 
@@ -14,7 +13,6 @@ interface HomeProps {
 const Home: React.FC<HomeProps> = ({ setCurrentView }) => {
   const { t } = useTranslation();
   const { getStats, getWordsForQuiz, loading, quizSessionSize, setQuizSessionSize } = useWordBank();
-  const { tokens, totalRemaining, loading: tokensLoading } = useTokens();
   const [selectedStatus, setSelectedStatus] = useState<WordStatus | null>(null);
   
   const stats = getStats();
@@ -84,28 +82,7 @@ const Home: React.FC<HomeProps> = ({ setCurrentView }) => {
         </div>
       </div>
 
-      {/* トークン残高カード */}
-      <div className="w-full max-w-md bg-white p-5 rounded-xl shadow-lg border border-slate-100 animate-slide-up" style={{ animationDelay: '130ms' }}>
-        <div className="flex items-center justify-between mb-3">
-          <p className="text-sm font-bold text-slate-600 flex items-center gap-2">
-            <Coins size={18} className="text-amber-500" />
-            {t('tokens.balance')}
-          </p>
-          <span className="text-xs text-slate-400">
-            {t('tokens.free')}: {tokens.freeTokens}
-            {tokens.paidTokens > 0 && ` / ${t('tokens.paid')}: ${tokens.paidTokens}`}
-          </span>
-        </div>
-        <div className="relative w-full h-3 bg-slate-100 rounded-full overflow-hidden">
-          <div
-            className="absolute left-0 top-0 h-full bg-gradient-to-r from-amber-400 to-amber-500 rounded-full transition-all duration-500"
-            style={{ width: `${Math.min((tokens.freeTokens / FREE_TOKEN_MONTHLY_LIMIT) * 100, 100)}%` }}
-          />
-        </div>
-        <p className="text-center text-lg font-bold text-slate-700 mt-2">
-          🪙 {totalRemaining}
-        </p>
-      </div>
+
 
       <div className="w-full max-w-md grid grid-cols-1 md:grid-cols-2 gap-4">
         <ActionButton
