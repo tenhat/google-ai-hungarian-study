@@ -174,7 +174,7 @@
   "tokens": {
     "confirmTitle": "Tokens will be consumed",
     "insufficient": "Insufficient Tokens",
-    "insufficientMessage": "You don't have enough tokens. Free tokens are reset on the 1st of each month.",
+    "insufficientMessage": "You don't have enough tokens. Free tokens are reset weekly.",
     "feature": "Feature",
     "cost": "Token Cost",
     "remaining": "Current Balance",
@@ -193,6 +193,9 @@
       "imageChatResponse": "Image Analysis",
       "translation": "Translation"
     },
-    "loginRequired": "Please log in to use AI features"
+    "loginRequired": "Please log in to use AI features",
+    "popoverTitle": "Token Details",
+    "weeklyReset": "Free tokens refill weekly",
+    "daysRemaining": "Refills in {{days}} days"
   }
 }

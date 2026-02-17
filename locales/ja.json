@@ -174,7 +174,7 @@
   "tokens": {
     "confirmTitle": "トークンを消費します",
     "insufficient": "トークン不足",
-    "insufficientMessage": "トークンが不足しています。無料トークンは毎月1日にリセットされます。",
+    "insufficientMessage": "トークンが不足しています。無料トークンは毎週リセットされます。",
     "feature": "機能",
     "cost": "消費トークン",
     "remaining": "現在の残高",
@@ -193,6 +193,9 @@
       "imageChatResponse": "画像解析",
       "translation": "翻訳"
     },
-    "loginRequired": "AI機能を利用するにはログインが必要です"
+    "loginRequired": "AI機能を利用するにはログインが必要です",
+    "popoverTitle": "トークン詳細",
+    "weeklyReset": "無料トークンは毎週回復します",
+    "daysRemaining": "あと {{days}} 日で回復"
   }
 }

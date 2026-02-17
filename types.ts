@@ -79,7 +79,7 @@ export interface TranslationResult {
 export interface UserTokens {
   freeTokens: number;        // 現在の無料トークン残高
   paidTokens: number;        // 現在の有料トークン残高
-  lastResetDate: string;     // 最後に無料トークンがリセットされた年月 (例: "2026-02")
+  lastResetDate: string;     // 最後に無料トークンがリセットされた日付 (ISO 8601 YYYY-MM-DD)
   totalUsed: number;         // 累計消費トークン数（統計用）
 }
 
@@ -93,5 +93,5 @@ export const TOKEN_COSTS = {
   translation: 3,           // 翻訳＋解説
 } as const;
 
-// 無料トークンの月間付与量
-export const FREE_TOKEN_MONTHLY_LIMIT = 100;
+// 無料トークンの週間付与量
+export const FREE_TOKEN_WEEKLY_LIMIT = 100;
