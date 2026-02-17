@@ -30,7 +30,7 @@ const highlightWordInSentence = (sentence: string, wordToHighlight: string) => {
 
 const Quiz: React.FC = () => {
   const { t } = useTranslation();
-  const { words, getWordsForQuiz, updateWordProgress, getWordById, progress, markAsMastered, loading } = useWordBank();
+  const { words, getWordsForQuiz, updateWordProgress, getWordById, progress, markAsMastered, loading, quizSessionSize } = useWordBank();
   
   interface QuizItem {
     word: Word;
@@ -50,7 +50,7 @@ const Quiz: React.FC = () => {
   useEffect(() => {
     // Only load quiz words if we don't have them yet and words are loaded
     if (quizItems.length === 0 && words.length > 0) {
-      const dueWords = getWordsForQuiz(10);
+      const dueWords = getWordsForQuiz(quizSessionSize);
       
       // Generate Quiz Items
       const newQuizItems: QuizItem[] = [];

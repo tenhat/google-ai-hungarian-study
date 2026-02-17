@@ -64,7 +64,8 @@
     "noLearningWordsDesc": "未学習の単語を学習中に変更してからクイズを始めてください。",
     "mastered": "習得済み",
     "masteredDesc": "正解おめでとうございます！この単語は「習得済み」に登録されました。",
-    "toReview": "復習へ"
+    "toReview": "復習へ",
+    "sessionSize": "1セッションの単語数"
   },
   "review": {
     "title": "復習チャレンジ",

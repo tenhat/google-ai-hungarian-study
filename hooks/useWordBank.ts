@@ -17,12 +17,15 @@ interface WordBankContextType {
   updateWord: (word: Word) => void;
   deleteWord: (wordId: string) => void;
   markAsLearning: (wordId: string) => void;
+  quizSessionSize: number;
+  setQuizSessionSize: (size: number) => void;
 }
 
 const WordBankContext = createContext<WordBankContextType | undefined>(undefined);
 
 const LOCAL_STORAGE_KEY_WORDS = 'hungarian-study-tenju-words';
 const LOCAL_STORAGE_KEY_PROGRESS = 'hungarian-study-tenju-progress';
+const LOCAL_STORAGE_KEY_SETTINGS = 'hungarian-study-tenju-settings';
 
 import { doc, setDoc, getDoc, collection, getDocs, writeBatch, deleteDoc } from 'firebase/firestore';
 import { db } from '../services/firebase';
@@ -31,6 +34,7 @@ import { useAuth } from '../contexts/AuthContext';
 export const WordBankProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [words, setWords] = useState<Word[]>([]);
   const [progress, setProgress] = useState<Map<string, WordProgress>>(new Map());
+  const [quizSessionSize, setQuizSessionSizeState] = useState<number>(10);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
@@ -184,6 +188,19 @@ export const WordBankProvider: React.FC<{ children: ReactNode }> = ({ children }
               }
             });
             setProgress(progressMap);
+
+            // Load settings
+            const storedSettings = localStorage.getItem(LOCAL_STORAGE_KEY_SETTINGS);
+            if (storedSettings) {
+                try {
+                    const settings = JSON.parse(storedSettings);
+                    if (settings.quizSessionSize) {
+                        setQuizSessionSizeState(settings.quizSessionSize);
+                    }
+                } catch (e) {
+                    console.error("Error parsing settings from localStorage", e);
+                }
+            }
         }
         setLoading(false);
     };
@@ -456,7 +473,19 @@ export const WordBankProvider: React.FC<{ children: ReactNode }> = ({ children }
     }
   }, [user]);
 
-  const contextValue = { words, progress, getWordById, getWordsForQuiz, getWordsForReviewChallenge, updateWordProgress, resetWordProgress, addNewWord, getStats, loading, markAsMastered, updateWord, deleteWord, markAsLearning };
+  const setQuizSessionSize = useCallback((size: number) => {
+    setQuizSessionSizeState(size);
+    // Persist immediately to localStorage
+    const settings = { quizSessionSize: size };
+    localStorage.setItem(LOCAL_STORAGE_KEY_SETTINGS, JSON.stringify(settings));
+    
+    // If user is logged in, we could sync to Firestore here in the future
+    if (user) {
+        // For now, let's just keep it in localStorage and optionally update user profile/settings
+    }
+  }, [user]);
+
+  const contextValue = { words, progress, getWordById, getWordsForQuiz, getWordsForReviewChallenge, updateWordProgress, resetWordProgress, addNewWord, getStats, loading, markAsMastered, updateWord, deleteWord, markAsLearning, quizSessionSize, setQuizSessionSize };
   return React.createElement(WordBankContext.Provider, { value: contextValue }, children);
 };
 

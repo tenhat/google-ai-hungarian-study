@@ -64,7 +64,8 @@
     "noLearningWordsDesc": "Please change some words to 'Learning' status to start the quiz.",
     "mastered": "Mastered",
     "masteredDesc": "Congratulations! This word has been marked as Mastered.",
-    "toReview": "Go to Review"
+    "toReview": "Go to Review",
+    "sessionSize": "Words per session"
   },
   "review": {
     "title": "Review Challenge",
