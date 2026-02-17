@@ -24,7 +24,7 @@ describe('constants.ts', () => {
 
   describe('SM-2 Algorithm Constants', () => {
     it('should have valid INITIAL_EASINESS', () => {
-      expect(INITIAL_EASINESS).toBe(2.5);
+      expect(INITIAL_EASINESS).toBe(2.3);
     });
 
     it('should have valid MIN_EASINESS', () => {
@@ -37,9 +37,10 @@ describe('constants.ts', () => {
     });
 
     it('should have valid LEARNING_INTERVALS', () => {
-      expect(LEARNING_INTERVALS).toEqual([1, 6]);
+      expect(LEARNING_INTERVALS).toEqual([1, 3, 7]);
       expect(LEARNING_INTERVALS[0]).toBe(1);
-      expect(LEARNING_INTERVALS[1]).toBe(6);
+      expect(LEARNING_INTERVALS[1]).toBe(3);
+      expect(LEARNING_INTERVALS[2]).toBe(7);
     });
   });
 });
@@ -85,13 +86,18 @@ describe('SM-2 Algorithm Logic', () => {
     expect(interval).toBe(1);
   });
 
-  it('should return 6 days interval for second repetition', () => {
+  it('should return 3 days interval for second repetition', () => {
     const interval = calculateInterval(1, 1, INITIAL_EASINESS);
-    expect(interval).toBe(6);
+    expect(interval).toBe(3);
+  });
+
+  it('should return 7 days interval for third repetition', () => {
+    const interval = calculateInterval(2, 3, INITIAL_EASINESS);
+    expect(interval).toBe(7);
   });
 
   it('should multiply by easiness for subsequent repetitions', () => {
-    const interval = calculateInterval(2, 6, 2.5);
-    expect(interval).toBe(15); // 6 * 2.5 = 15
+    const interval = calculateInterval(3, 7, 2.3);
+    expect(interval).toBe(17); // 7 * 2.3 = 16.1 -> Math.ceil = 17
   });
 });

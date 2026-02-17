@@ -80,7 +80,7 @@ export const INITIAL_WORDS: Word[] = [
 ];
 
 // SM-2 Algorithm Constants
-export const INITIAL_EASINESS = 2.5;
+export const INITIAL_EASINESS = 2.3; // 2.5 から 2.3 へ。伸びを緩やかに。
 export const MIN_EASINESS = 1.3;
 export const CORRECT_ANSWER_THRESHOLD = 3; // Grade 3-5 is correct
-export const LEARNING_INTERVALS = [1, 6]; // in days for the first two correct repetitions
+export const LEARNING_INTERVALS = [1, 3, 7]; // 最初の間隔を [1, 6] から [1, 3, 7] へ細分化

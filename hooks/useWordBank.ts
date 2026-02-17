@@ -330,10 +330,8 @@ export const WordBankProvider: React.FC<{ children: ReactNode }> = ({ children }
 
     if (quality >= CORRECT_ANSWER_THRESHOLD) { 
         newProgress.lastCorrect = true;
-        if (newProgress.repetitions === 0) {
-            newProgress.interval = LEARNING_INTERVALS[0];
-        } else if (newProgress.repetitions === 1) {
-            newProgress.interval = LEARNING_INTERVALS[1];
+        if (newProgress.repetitions < LEARNING_INTERVALS.length) {
+            newProgress.interval = LEARNING_INTERVALS[newProgress.repetitions];
         } else {
             newProgress.interval = Math.ceil(newProgress.interval * newProgress.easiness);
         }
@@ -352,7 +350,7 @@ export const WordBankProvider: React.FC<{ children: ReactNode }> = ({ children }
     now.setDate(now.getDate() + newProgress.interval);
     newProgress.nextReviewDate = now.toISOString();
 
-    if(newProgress.interval > 30) { 
+    if(newProgress.interval >= 60) { 
         newProgress.status = WordStatus.Mastered;
     }
 
