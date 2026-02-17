@@ -11,9 +11,9 @@ describe('types.ts', () => {
       expect(View.ReviewChallenge).toBe('ReviewChallenge');
     });
 
-    it('should have 5 view types', () => {
+    it('should have 6 view types', () => {
       const viewValues = Object.values(View);
-      expect(viewValues).toHaveLength(5);
+      expect(viewValues).toHaveLength(6);
     });
   });
 
