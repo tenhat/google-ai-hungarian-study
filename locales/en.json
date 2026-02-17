@@ -170,5 +170,29 @@
     "hungarian": "Hungarian",
     "japanese": "Japanese",
     "words": "Words"
+  },
+  "tokens": {
+    "confirmTitle": "Tokens will be consumed",
+    "insufficient": "Insufficient Tokens",
+    "insufficientMessage": "You don't have enough tokens. Free tokens are reset on the 1st of each month.",
+    "feature": "Feature",
+    "cost": "Token Cost",
+    "remaining": "Current Balance",
+    "afterUse": "After Use",
+    "confirm": "Proceed",
+    "cancel": "Cancel",
+    "dontShowAgain": "Don't show this confirmation again",
+    "balance": "Token Balance",
+    "free": "Free",
+    "paid": "Paid",
+    "featureNames": {
+      "chatResponse": "AI Chat",
+      "grammarCorrection": "Grammar Check",
+      "wordTranslation": "Word Translation",
+      "dailyQuestion": "Daily Question",
+      "imageChatResponse": "Image Analysis",
+      "translation": "Translation"
+    },
+    "loginRequired": "Please log in to use AI features"
   }
 }

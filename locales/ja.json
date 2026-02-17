@@ -170,5 +170,29 @@
     "hungarian": "ハンガリー語",
     "japanese": "日本語",
     "words": "単語"
+  },
+  "tokens": {
+    "confirmTitle": "トークンを消費します",
+    "insufficient": "トークン不足",
+    "insufficientMessage": "トークンが不足しています。無料トークンは毎月1日にリセットされます。",
+    "feature": "機能",
+    "cost": "消費トークン",
+    "remaining": "現在の残高",
+    "afterUse": "使用後の残高",
+    "confirm": "実行する",
+    "cancel": "キャンセル",
+    "dontShowAgain": "今後この確認を表示しない",
+    "balance": "トークン残高",
+    "free": "無料",
+    "paid": "有料",
+    "featureNames": {
+      "chatResponse": "AIチャット",
+      "grammarCorrection": "文法チェック",
+      "wordTranslation": "単語翻訳",
+      "dailyQuestion": "デイリー質問",
+      "imageChatResponse": "画像解析",
+      "translation": "翻訳"
+    },
+    "loginRequired": "AI機能を利用するにはログインが必要です"
   }
 }

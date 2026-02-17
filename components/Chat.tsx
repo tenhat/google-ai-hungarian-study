@@ -2,12 +2,16 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getChatResponse, getGrammarCorrection, getWordTranslation, getDailyQuestion, getImageChatResponse } from '../services/geminiService';
-import { ChatMessage } from '../types';
+import { ChatMessage, TOKEN_COSTS } from '../types';
 import { Send, CheckCircle, AlertCircle, Sparkles, Loader2, Camera, X, Trash2 } from 'lucide-react';
 import { useWordBank } from '../hooks/useWordBank';
-
+import { useTokens } from '../hooks/useTokens';
+import { useAuth } from '../contexts/AuthContext';
+import TokenConfirmModal, { shouldSkipConfirm } from './shared/TokenConfirmModal';
 const Chat: React.FC = () => {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const { consumeTokens, hasEnoughTokens } = useTokens();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [userInput, setUserInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -19,6 +23,10 @@ const Chat: React.FC = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [imageMimeType, setImageMimeType] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // トークン確認モーダルの状態
+  const [showTokenConfirm, setShowTokenConfirm] = useState(false);
+  const [pendingTokenAction, setPendingTokenAction] = useState<{ cost: number; featureName: string; action: () => void } | null>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -79,14 +87,53 @@ const Chat: React.FC = () => {
     return () => { mounted = false; };
   }, [isHistoryLoaded]); // Only run when history load completes (messages dep removed to avoid loops, intentionally running once per load)
   
+  // トークン確認付きでAI機能を実行するヘルパー
+  const executeWithTokenCheck = (cost: number, featureName: string, action: () => void) => {
+    if (!user) return;
+    if (!hasEnoughTokens(cost)) {
+      setPendingTokenAction({ cost, featureName, action });
+      setShowTokenConfirm(true);
+      return;
+    }
+    if (shouldSkipConfirm()) {
+      action();
+    } else {
+      setPendingTokenAction({ cost, featureName, action });
+      setShowTokenConfirm(true);
+    }
+  };
+
+  const handleTokenConfirm = () => {
+    setShowTokenConfirm(false);
+    if (pendingTokenAction) {
+      pendingTokenAction.action();
+      setPendingTokenAction(null);
+    }
+  };
+
+  const handleTokenCancel = () => {
+    setShowTokenConfirm(false);
+    setPendingTokenAction(null);
+  };
+
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userInput.trim() || isLoading) return;
 
+    // チャット応答(3) + 文法チェック(1) = 4トークン
+    const totalCost = TOKEN_COSTS.chatResponse + TOKEN_COSTS.grammarCorrection;
+    executeWithTokenCheck(totalCost, t('tokens.featureNames.chatResponse'), () => doSendMessage(userInput));
+  };
+
+  const doSendMessage = async (input: string) => {
+    const totalCost = TOKEN_COSTS.chatResponse + TOKEN_COSTS.grammarCorrection;
+    const consumed = await consumeTokens(totalCost);
+    if (!consumed) return;
+
     const userMessage: ChatMessage = {
       id: `user-${Date.now()}`,
       role: 'user',
-      text: userInput,
+      text: input,
       timestamp: Date.now(),
     };
     
@@ -94,11 +141,11 @@ const Chat: React.FC = () => {
     setUserInput('');
     setIsLoading(true);
 
-    const correction = await getGrammarCorrection(userInput);
+    const correction = await getGrammarCorrection(input);
     
     setMessages(prev => prev.map(msg => msg.id === userMessage.id ? {...msg, correction} : msg));
 
-    const correctedSentence = correction.isCorrect ? userInput : (correction.correctedSentence || userInput);
+    const correctedSentence = correction.isCorrect ? input : (correction.correctedSentence || input);
     const { text: aiResponseText, translation, segments } = await getChatResponse(messages, correctedSentence);
 
     const aiMessage: ChatMessage = {
@@ -193,6 +240,14 @@ const Chat: React.FC = () => {
   const handleImageSend = async () => {
     if (!selectedImage || isLoading) return;
 
+    executeWithTokenCheck(TOKEN_COSTS.imageChatResponse, t('tokens.featureNames.imageChatResponse'), () => doImageSend());
+  };
+
+  const doImageSend = async () => {
+    if (!selectedImage) return;
+    const consumed = await consumeTokens(TOKEN_COSTS.imageChatResponse);
+    if (!consumed) return;
+
     // base64データ部分を抽出（data:image/jpeg;base64, を除去）
     const base64Data = selectedImage.split(',')[1];
     // MIMEタイプをローカル変数に保持（ステートクリア前に取得）
@@ -275,7 +330,16 @@ const Chat: React.FC = () => {
   const handleWordClick = async (word: string, fullText: string, translationText?: string, segments?: { hungarian: string; japanese: string; }[]) => {
     const cleanedWord = word.replace(/[.,!?()]/g, '').toLowerCase(); 
     if (!cleanedWord) return;
-    
+
+    executeWithTokenCheck(TOKEN_COSTS.wordTranslation, t('tokens.featureNames.wordTranslation'), () => 
+      doWordClick(cleanedWord, fullText, translationText, segments)
+    );
+  };
+
+  const doWordClick = async (cleanedWord: string, fullText: string, translationText?: string, segments?: { hungarian: string; japanese: string; }[]) => {
+    const consumed = await consumeTokens(TOKEN_COSTS.wordTranslation);
+    if (!consumed) return;
+
     setSelectedWord(cleanedWord);
     setJapaneseMeaning(''); 
     
@@ -598,6 +662,16 @@ const Chat: React.FC = () => {
                 </div>
             </div>
         </div>
+      )}
+
+      {/* トークン確認モーダル */}
+      {showTokenConfirm && pendingTokenAction && (
+        <TokenConfirmModal
+          cost={pendingTokenAction.cost}
+          featureName={pendingTokenAction.featureName}
+          onConfirm={handleTokenConfirm}
+          onCancel={handleTokenCancel}
+        />
       )}
     </div>
   );

@@ -2,9 +2,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getTranslation, getWordTranslation } from '../services/geminiService';
-import { TranslationResult } from '../types';
+import { TranslationResult, TOKEN_COSTS } from '../types';
 import { Languages, Send, Loader2, BookOpen, ListChecks, Mic, MicOff, ArrowRightLeft } from 'lucide-react';
 import { useWordBank } from '../hooks/useWordBank';
+import { useTokens } from '../hooks/useTokens';
+import { useAuth } from '../contexts/AuthContext';
+import TokenConfirmModal, { shouldSkipConfirm } from './shared/TokenConfirmModal';
 
 // Web Speech API の型定義
 interface SpeechRecognitionEvent extends Event {
@@ -57,11 +60,17 @@ declare global {
 
 const Translate: React.FC = () => {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const { consumeTokens, hasEnoughTokens } = useTokens();
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<TranslationResult | null>(null);
   const [direction, setDirection] = useState<'ja_to_hu' | 'hu_to_ja'>('ja_to_hu');
   const { addNewWord } = useWordBank();
+
+  // トークン確認モーダルの状態
+  const [showTokenConfirm, setShowTokenConfirm] = useState(false);
+  const [pendingTokenAction, setPendingTokenAction] = useState<{ cost: number; featureName: string; action: () => void } | null>(null);
 
   // 音声入力用State
   const [isListening, setIsListening] = useState(false);
@@ -147,8 +156,44 @@ const Translate: React.FC = () => {
     }
   };
 
+  // トークン確認付きでAI機能を実行するヘルパー
+  const executeWithTokenCheck = (cost: number, featureName: string, action: () => void) => {
+    if (!user) return;
+    if (!hasEnoughTokens(cost)) {
+      setPendingTokenAction({ cost, featureName, action });
+      setShowTokenConfirm(true);
+      return;
+    }
+    if (shouldSkipConfirm()) {
+      action();
+    } else {
+      setPendingTokenAction({ cost, featureName, action });
+      setShowTokenConfirm(true);
+    }
+  };
+
+  const handleTokenConfirm = () => {
+    setShowTokenConfirm(false);
+    if (pendingTokenAction) {
+      pendingTokenAction.action();
+      setPendingTokenAction(null);
+    }
+  };
+
+  const handleTokenCancel = () => {
+    setShowTokenConfirm(false);
+    setPendingTokenAction(null);
+  };
+
   const handleTranslate = async () => {
     if (!inputText.trim() || isLoading) return;
+
+    executeWithTokenCheck(TOKEN_COSTS.translation, t('tokens.featureNames.translation'), () => doTranslate());
+  };
+
+  const doTranslate = async () => {
+    const consumed = await consumeTokens(TOKEN_COSTS.translation);
+    if (!consumed) return;
 
     setIsLoading(true);
     setResult(null);
@@ -211,6 +256,21 @@ const Translate: React.FC = () => {
   ) => {
     const cleanedWord = word.replace(/[.,!?()]/g, '').toLowerCase();
     if (!cleanedWord) return;
+
+    // トークンチェックと実行
+    executeWithTokenCheck(TOKEN_COSTS.wordTranslation, t('tokens.featureNames.wordTranslation'), () => 
+      doWordTranslation(cleanedWord, contextText, exampleSentenceArg, exampleTranslationArg)
+    );
+  };
+
+  const doWordTranslation = async (
+    cleanedWord: string,
+    contextText: string,
+    exampleSentenceArg: string,
+    exampleTranslationArg: string
+  ) => {
+    const consumed = await consumeTokens(TOKEN_COSTS.wordTranslation);
+    if (!consumed) return;
 
     setSelectedWord(cleanedWord);
     setJapaneseMeaning('');
@@ -469,6 +529,16 @@ const Translate: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* トークン確認モーダル */}
+      {showTokenConfirm && pendingTokenAction && (
+        <TokenConfirmModal
+          cost={pendingTokenAction.cost}
+          featureName={pendingTokenAction.featureName}
+          onConfirm={handleTokenConfirm}
+          onCancel={handleTokenCancel}
+        />
       )}
     </div>
   );

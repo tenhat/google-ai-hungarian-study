@@ -12,6 +12,7 @@ import { BrainCircuit, MessageSquare, HomeIcon, Languages, Target, Headphones } 
 import { useTranslation } from 'react-i18next';
 
 import { AuthProvider } from './contexts/AuthContext';
+import { TokenProvider } from './hooks/useTokens';
 
 const App: React.FC = () => {
   const { t } = useTranslation();
@@ -45,6 +46,7 @@ const App: React.FC = () => {
 
   return (
     <AuthProvider>
+      <TokenProvider>
       <WordBankProvider>
         <div className="min-h-screen bg-slate-100 flex flex-col">
         <Header />
@@ -101,6 +103,7 @@ const App: React.FC = () => {
         </nav>
       </div>
       </WordBankProvider>
+      </TokenProvider>
     </AuthProvider>
   );
 };

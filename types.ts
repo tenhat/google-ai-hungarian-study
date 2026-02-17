@@ -73,3 +73,25 @@ export interface TranslationResult {
     };
   }[];
 }
+
+// --- トークン制 ---
+
+export interface UserTokens {
+  freeTokens: number;        // 現在の無料トークン残高
+  paidTokens: number;        // 現在の有料トークン残高
+  lastResetDate: string;     // 最後に無料トークンがリセットされた年月 (例: "2026-02")
+  totalUsed: number;         // 累計消費トークン数（統計用）
+}
+
+// 各AI機能のトークン消費量
+export const TOKEN_COSTS = {
+  chatResponse: 3,          // AIチャット応答
+  grammarCorrection: 1,     // 文法チェック
+  wordTranslation: 1,       // 単語翻訳
+  dailyQuestion: 2,         // デイリー質問生成
+  imageChatResponse: 5,     // 画像解析
+  translation: 3,           // 翻訳＋解説
+} as const;
+
+// 無料トークンの月間付与量
+export const FREE_TOKEN_MONTHLY_LIMIT = 100;
