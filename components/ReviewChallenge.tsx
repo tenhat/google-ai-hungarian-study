@@ -3,6 +3,7 @@ import { useWordBank } from '../hooks/useWordBank';
 import { Word } from '../types';
 import { Trophy, RefreshCw, Volume2, ArrowRight, CheckCircle2, XCircle, Target, Play } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { useTranslation } from 'react-i18next';
 
 const STORAGE_KEY = 'review-challenge-progress';
 
@@ -14,6 +15,7 @@ interface ChallengeProgress {
 }
 
 const ReviewChallenge: React.FC = () => {
+  const { t } = useTranslation();
   const { words, getWordsForReviewChallenge, resetWordProgress, getStats } = useWordBank();
   const [quizWords, setQuizWords] = useState<Word[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -191,19 +193,18 @@ const ReviewChallenge: React.FC = () => {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] p-6 bg-white rounded-xl shadow-lg">
         <Target className="text-orange-500 mb-4" size={64} />
-        <h2 className="text-2xl font-bold text-slate-800 mb-2">復習チャレンジ</h2>
-        <p className="text-slate-600 mb-6 text-center">
-          学習中の単語を全てテストします。<br />
-          日本語からハンガリー語を選んでください。
+        <h2 className="text-2xl font-bold text-slate-800 mb-2">{t('review.title')}</h2>
+        <p className="text-slate-600 mb-6 text-center whitespace-pre-line">
+          {t('review.description2')}
         </p>
         <div className="bg-orange-50 p-4 rounded-lg mb-6 text-center">
           <p className="text-lg font-bold text-orange-600">
-            {stats.learningCount}単語
+            {stats.learningCount}{t('common.words')}
           </p>
-          <p className="text-sm text-slate-500">出題対象</p>
+          <p className="text-sm text-slate-500">{t('review.targetWords')}</p>
         </div>
         {stats.learningCount === 0 ? (
-          <p className="text-slate-500">学習中の単語がありません。まず通常Quizで単語を学習してください。</p>
+          <p className="text-slate-500">{t('review.noLearningWords')}</p>
         ) : (
           <div className="flex flex-col gap-3">
             {savedProgress && (
@@ -212,7 +213,7 @@ const ReviewChallenge: React.FC = () => {
                 className="bg-orange-500 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:bg-orange-600 transition-colors flex items-center gap-2"
               >
                 <Play size={20} />
-                続きから再開（{savedProgress.currentIndex + 1}/{savedProgress.wordIds.length}）
+                {t('review.resume')}（{savedProgress.currentIndex + 1}/{savedProgress.wordIds.length}）
               </button>
             )}
             <button
@@ -220,7 +221,7 @@ const ReviewChallenge: React.FC = () => {
               className={`${savedProgress ? 'bg-slate-200 text-slate-700 hover:bg-slate-300' : 'bg-orange-500 text-white hover:bg-orange-600'} font-bold py-3 px-8 rounded-full shadow-lg transition-colors flex items-center gap-2`}
             >
               <Target size={20} />
-              {savedProgress ? '最初から始める' : 'チャレンジ開始'}
+              {savedProgress ? t('review.restart') : t('review.startChallenge')}
             </button>
           </div>
         )}
@@ -234,28 +235,28 @@ const ReviewChallenge: React.FC = () => {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] p-6 bg-white rounded-xl shadow-lg">
         <Trophy className="text-yellow-500 mb-4" size={64} />
-        <h2 className="text-2xl font-bold text-slate-800 mb-2">チャレンジ完了！</h2>
+        <h2 className="text-2xl font-bold text-slate-800 mb-2">{t('review.completeTitle')}</h2>
         
         <div className="grid grid-cols-2 gap-4 my-6 w-full max-w-xs">
           <div className="bg-green-50 p-4 rounded-lg text-center">
             <CheckCircle2 className="text-green-500 mx-auto mb-2" size={32} />
             <p className="text-2xl font-bold text-green-600">{correctCount}</p>
-            <p className="text-sm text-slate-500">正解</p>
+            <p className="text-sm text-slate-500">{t('review.correctCount')}</p>
           </div>
           <div className="bg-red-50 p-4 rounded-lg text-center">
             <XCircle className="text-red-500 mx-auto mb-2" size={32} />
             <p className="text-2xl font-bold text-red-600">{incorrectCount}</p>
-            <p className="text-sm text-slate-500">不正解</p>
+            <p className="text-sm text-slate-500">{t('review.incorrectCount')}</p>
           </div>
         </div>
         
         <p className="text-lg text-slate-600 mb-6">
-          正答率: <span className="font-bold text-slate-800">{accuracy}%</span>
+          {t('review.accuracyPrefix')} <span className="font-bold text-slate-800">{accuracy}%</span>
         </p>
         
         {incorrectCount > 0 && (
           <p className="text-sm text-orange-600 mb-4">
-            ※ 不正解の{incorrectCount}単語は通常Quizで再出題されます
+            {t('review.retryNote', { count: incorrectCount })}
           </p>
         )}
         
@@ -264,7 +265,7 @@ const ReviewChallenge: React.FC = () => {
           className="bg-slate-200 text-slate-700 font-semibold py-3 px-6 rounded-full hover:bg-slate-300 transition-colors flex items-center gap-2"
         >
           <RefreshCw size={20} />
-          戻る
+          {t('common.back')}
         </button>
       </div>
     );
@@ -282,7 +283,7 @@ const ReviewChallenge: React.FC = () => {
           <div className="bg-orange-100 p-1.5 rounded-lg">
             <Target className="text-orange-600" size={20} />
           </div>
-          <span className="font-bold text-slate-800 text-base">Review Challenge</span>
+          <span className="font-bold text-slate-800 text-base">{t('review.title')}</span>
         </div>
         <span className="text-xs font-bold bg-slate-100 text-slate-500 px-2 py-1 rounded-full">
           {currentIndex + 1} / {quizWords.length}
@@ -304,14 +305,14 @@ const ReviewChallenge: React.FC = () => {
             className="flex-grow flex flex-col animate-slide-up"
         >
           <div className="text-center mb-6">
-            <p className="text-xs font-bold text-orange-500 uppercase tracking-widest mb-2">Translate into Hungarian</p>
+            <p className="text-xs font-bold text-orange-500 uppercase tracking-widest mb-2">{t('review.translateInstruction')}</p>
             <p className="text-2xl md:text-4xl font-extrabold text-slate-800 mb-3 tracking-tight">
               {currentWord.japanese}
             </p>
             {currentWord.example && (
               <div className="inline-block bg-orange-50 px-3 py-1.5 rounded-lg border border-orange-100">
                 <p className="text-xs text-slate-600 italic flex items-center gap-1.5">
-                  <span className="bg-orange-200 text-orange-800 text-[10px] px-1.5 rounded font-bold">HINT</span> 
+                  <span className="bg-orange-200 text-orange-800 text-[10px] px-1.5 rounded font-bold">{t('review.hint')}</span> 
                   {currentWord.example.translation}
                 </p>
               </div>
@@ -376,11 +377,11 @@ const ReviewChallenge: React.FC = () => {
                     </div>
                     <div>
                         <span className={`text-base font-extrabold ${isCorrect ? 'text-green-800' : 'text-red-800'}`}>
-                        {isCorrect ? 'Correct!' : 'Incorrect'}
+                        {isCorrect ? t('quiz.correct') : t('quiz.incorrect')}
                         </span>
                         {!isCorrect && (
                         <p className="text-xs text-red-700 font-medium mt-0.5">
-                            Answer: <span className="font-bold">{currentWord.hungarian}</span>
+                            {t('quiz.correctAnswerPrefix')} <span className="font-bold">{currentWord.hungarian}</span>
                         </p>
                         )}
                     </div>
@@ -388,7 +389,7 @@ const ReviewChallenge: React.FC = () => {
                   <button
                     onClick={playAudio}
                     className="p-2.5 rounded-lg hover:bg-white/50 text-slate-500 hover:text-orange-600 transition-all border border-transparent hover:border-orange-200 hover:shadow-sm"
-                    title="Listen"
+                    title={t('quiz.listening')}
                   >
                     <Volume2 size={20} />
                   </button>
@@ -402,12 +403,12 @@ const ReviewChallenge: React.FC = () => {
               >
                 {currentIndex < quizWords.length - 1 ? (
                   <>
-                    Next Question
+                    {t('review.nextQuestion')}
                     <ArrowRight size={18} />
                   </>
                 ) : (
                   <>
-                    Finish Challenge
+                    {t('review.finishChallenge')}
                     <Trophy size={18} />
                   </>
                 )}

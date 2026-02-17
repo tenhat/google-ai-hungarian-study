@@ -1,21 +1,37 @@
 import React from 'react';
-import { BookMarked, LogIn, LogOut, User } from 'lucide-react';
+import { BookMarked, LogIn, LogOut, User, Globe } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 
 const Header: React.FC = () => {
   const { user, signInWithGoogle, logout } = useAuth();
+  const { t, i18n } = useTranslation();
+
+  const toggleLanguage = () => {
+    const currentLang = i18n.language;
+    // i18next might return 'ja-JP' or 'en-US', so simple check or startswith
+    const newLang = currentLang.startsWith('en') ? 'ja' : 'en';
+    i18n.changeLanguage(newLang);
+  };
 
   return (
     <header className="bg-white shadow-md sticky top-0 z-10">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
             <BookMarked className="text-blue-600" size={32} />
-            <h1 className="text-xl font-bold text-slate-800 hidden sm:block">
-            Hungarian Study <span className="text-blue-600">Tenju</span>
-            </h1>
+            <h1 className="text-xl font-bold text-slate-800">{t('home.title')}</h1>
         </div>
         
         <div className="flex items-center gap-4">
+            <button 
+                onClick={toggleLanguage}
+                className="flex items-center gap-1 p-2 text-slate-500 hover:text-blue-600 transition-colors rounded-lg hover:bg-slate-50"
+                title="Switch Language"
+            >
+                <Globe size={20} />
+                <span className="text-sm font-medium uppercase">{i18n.language.startsWith('en') ? 'EN' : 'JA'}</span>
+            </button>
+
             {user ? (
                 <div className="flex items-center gap-3">
                     <div className="flex items-center gap-2">

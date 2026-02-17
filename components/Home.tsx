@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { View, WordStatus } from '../types';
 import { useWordBank } from '../hooks/useWordBank';
 import { BrainCircuit, MessageSquare, CheckCircle, Clock, Star, Loader } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import WordList from './WordList';
 
 interface HomeProps {
@@ -10,6 +11,7 @@ interface HomeProps {
 }
 
 const Home: React.FC<HomeProps> = ({ setCurrentView }) => {
+  const { t } = useTranslation();
   const { getStats, getWordsForQuiz, loading } = useWordBank();
   const [selectedStatus, setSelectedStatus] = useState<WordStatus | null>(null);
   
@@ -20,7 +22,7 @@ const Home: React.FC<HomeProps> = ({ setCurrentView }) => {
     return (
       <div className="flex-grow flex flex-col justify-center items-center p-4">
         <Loader className="animate-spin text-blue-600" size={48} />
-        <p className="text-slate-500 mt-4 font-medium">読み込み中...</p>
+        <p className="text-slate-500 mt-4 font-medium">{t('common.loading')}</p>
       </div>
     );
   }
@@ -29,29 +31,29 @@ const Home: React.FC<HomeProps> = ({ setCurrentView }) => {
     <div className="flex-grow flex flex-col justify-center items-center p-4 space-y-8 animate-fade-in relative">
       <div className="text-center animate-slide-up">
         <h2 className="text-3xl font-bold text-slate-800">Üdvözöljük!</h2>
-        <p className="text-slate-500 mt-2">ハンガリー語学習ダッシュボードへようこそ</p>
+        <p className="text-slate-500 mt-2">{t('home.title')}</p>
       </div>
 
       <div className="w-full max-w-md bg-white p-6 rounded-xl shadow-xl border border-slate-100 space-y-4 animate-slide-up" style={{ animationDelay: '100ms' }}>
-        <h3 className="text-lg font-bold text-center text-slate-700 border-b pb-2">学習状況</h3>
+        <h3 className="text-lg font-bold text-center text-slate-700 border-b pb-2">{t('review.progress')}</h3>
         <div className="grid grid-cols-3 gap-4 text-center">
           <StatCard 
             icon={<Star size={24} className="text-yellow-500" />} 
-            label="未習得" 
+            label={t('home.new')}
             value={stats.newCount} 
             delay="200ms" 
             onClick={() => setSelectedStatus(WordStatus.New)}
           />
           <StatCard 
             icon={<Clock size={24} className="text-orange-500" />} 
-            label="学習中" 
+            label={t('home.learning')}
             value={stats.learningCount} 
             delay="300ms" 
             onClick={() => setSelectedStatus(WordStatus.Learning)}
           />
           <StatCard 
             icon={<CheckCircle size={24} className="text-green-500" />} 
-            label="習得済み" 
+            label={t('home.mastered')}
             value={stats.masteredCount} 
             delay="400ms" 
             onClick={() => setSelectedStatus(WordStatus.Mastered)}
@@ -62,8 +64,8 @@ const Home: React.FC<HomeProps> = ({ setCurrentView }) => {
       <div className="w-full max-w-md grid grid-cols-1 md:grid-cols-2 gap-4">
         <ActionButton
           icon={<BrainCircuit size={32} />}
-          title="単語クイズ"
-          subtitle={`${dueWordsCount} 単語の復習が必要です`}
+          title={t('home.startQuiz')}
+          subtitle={t('home.subtitle_quiz', { count: dueWordsCount }) || `${dueWordsCount} words due`}
           onClick={() => setCurrentView(View.Quiz)}
           className="bg-gradient-to-br from-blue-600 to-indigo-600 hover:shadow-blue-200"
           badge={dueWordsCount > 0 ? dueWordsCount.toString() : undefined}
@@ -71,24 +73,24 @@ const Home: React.FC<HomeProps> = ({ setCurrentView }) => {
         />
         <ActionButton
           icon={<MessageSquare size={32} />}
-          title="AIチャット"
-          subtitle="会話練習"
+          title={t('home.aiChat')}
+          subtitle={t('home.subtitle_chat') || "Conversation Practice"}
           onClick={() => setCurrentView(View.Chat)}
           className="bg-gradient-to-br from-purple-600 to-fuchsia-600 hover:shadow-purple-200"
           delay="600ms"
         />
         <ActionButton
           icon={<BrainCircuit size={32} className="rotate-180" />}
-          title="復習チャレンジ"
-          subtitle="4択スピードクイズ"
+          title={t('home.reviewChallenge')}
+          subtitle={t('home.subtitle_review') || "Speed Quiz"}
           onClick={() => setCurrentView(View.ReviewChallenge)}
           className="bg-gradient-to-br from-orange-500 to-amber-500 hover:shadow-orange-200"
           delay="700ms"
         />
         <ActionButton
           icon={<Clock size={32} />}
-          title="聞き流し"
-          subtitle="自動再生・暗記"
+          title={t('home.listeningMode')}
+          subtitle={t('home.subtitle_listening') || "Auto Playback"}
           onClick={() => setCurrentView(View.ListeningMode)}
           className="bg-gradient-to-br from-teal-500 to-emerald-500 hover:shadow-teal-200"
           delay="800ms"

@@ -3,6 +3,7 @@ import { useWordBank } from '../hooks/useWordBank';
 import { Word, QuizMode } from '../types';
 import { ArrowRight, Volume2, Check, X, CheckCircle, HelpCircle, XCircle } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { useTranslation } from 'react-i18next';
 
 
 const highlightWordInSentence = (sentence: string, wordToHighlight: string) => {
@@ -28,6 +29,7 @@ const highlightWordInSentence = (sentence: string, wordToHighlight: string) => {
 };
 
 const Quiz: React.FC = () => {
+  const { t } = useTranslation();
   const { words, getWordsForQuiz, updateWordProgress, getWordById, progress, markAsMastered, loading } = useWordBank();
   
   interface QuizItem {
@@ -196,6 +198,7 @@ const Quiz: React.FC = () => {
 
   if (loading || (quizItems.length === 0 && words.length > 0)) {
      // Show loading or empty state if needed
+     return <div className="text-center p-4">{t('common.loading')}</div>; 
   }
 
   if (quizItems.length === 0) {
@@ -203,8 +206,8 @@ const Quiz: React.FC = () => {
       <div className="flex-grow flex flex-col justify-center items-center text-center p-4">
         <div className="bg-white p-8 rounded-xl shadow-lg animate-scale-in">
           <div className="text-6xl mb-4">🎉</div>
-          <h2 className="text-2xl font-bold text-green-600 mb-2">完了！</h2>
-          <p className="text-slate-500">今日の復習はすべて終わりました。素晴らしい！</p>
+          <h2 className="text-2xl font-bold text-green-600 mb-2">{t('quiz.completedTitle')}</h2>
+          <p className="text-slate-500">{t('quiz.allReviewed')}</p>
         </div>
       </div>
     );
@@ -230,7 +233,7 @@ const Quiz: React.FC = () => {
                 </div>
                  {wordContext && <div className="text-xs text-blue-600 font-bold mb-2 tracking-wide bg-blue-50 inline-block px-1.5 py-0.5 rounded">{wordContext}</div>}
                 <div className="text-center py-2">
-                    <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">{quizMode === QuizMode.HuToJp ? 'ハンガリー語' : '日本語'}</p>
+                    <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">{quizMode === QuizMode.HuToJp ? t('common.hungarian') : t('common.japanese')}</p>
                     <h2 className="text-2xl md:text-4xl font-extrabold text-slate-800 tracking-tight leading-tight">{question}</h2>
                     {quizMode === QuizMode.HuToJp && (
                         <button 
@@ -253,10 +256,10 @@ const Quiz: React.FC = () => {
                 <button 
                   onClick={handleMastered}
                   className="flex items-center gap-1.5 text-emerald-600 hover:text-emerald-700 font-bold px-3 py-1.5 rounded-lg hover:bg-emerald-50 transition-colors text-xs"
-                  title="既にこの単語を知っていますか？スキップします。"
+                  title={t('quiz.skipTooltip')}
                 >
                     <CheckCircle size={16} />
-                    <span>習得済み</span>
+                    <span>{t('quiz.mastered')}</span>
                 </button>
             </div>
 
@@ -286,7 +289,7 @@ const Quiz: React.FC = () => {
                         className="flex items-center gap-1.5 text-slate-400 hover:text-slate-600 font-medium px-4 py-1.5 rounded-full hover:bg-slate-100 transition-colors text-xs"
                     >
                         <HelpCircle size={16} />
-                        <span>わからない</span>
+                        <span>{t('quiz.unknown')}</span>
                     </button>
                 </div>
             )}
@@ -303,11 +306,11 @@ const Quiz: React.FC = () => {
                         </div>
                         <div className="flex-1 min-w-0">
                             <p className={`text-lg font-black truncate ${isCorrect ? 'text-green-800' : 'text-red-800'}`}>
-                                {isCorrect ? '正解！' : '不正解...'}
+                                {isCorrect ? t('quiz.correct') : t('quiz.incorrect')}
                             </p>
                             {!isCorrect && (
                                 <p className="text-red-700 text-sm font-medium mt-0.5 truncate">
-                                    正解: <span className="font-bold border-b border-red-300 ml-1">{correctAnswer}</span>
+                                    {t('quiz.correctAnswerPrefix')} <span className="font-bold border-b border-red-300 ml-1">{correctAnswer}</span>
                                 </p>
                             )}
                         </div>
@@ -321,7 +324,7 @@ const Quiz: React.FC = () => {
                             }`}
                         autoFocus
                     >
-                        <span>次へ</span> <ArrowRight size={18} />
+                        <span>{t('quiz.next')}</span> <ArrowRight size={18} />
                     </button>
                 </div>
             )}

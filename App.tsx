@@ -9,10 +9,12 @@ import { WordBankProvider } from './hooks/useWordBank';
 import { View } from './types';
 import Header from './components/shared/Header';
 import { BrainCircuit, MessageSquare, HomeIcon, Languages, Target, Headphones } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { AuthProvider } from './contexts/AuthContext';
 
 const App: React.FC = () => {
+  const { t } = useTranslation();
   const [currentView, setCurrentView] = useState<View>(View.Home);
 
   // ビュー切り替え時に画面上部にスクロール（iOS Safari対応）
@@ -58,42 +60,42 @@ const App: React.FC = () => {
               className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-colors ${currentView === View.Home ? 'text-blue-600' : 'text-slate-500 hover:bg-slate-100'}`}
             >
               <HomeIcon size={24} />
-              <span className="text-xs font-medium">Home</span>
+              <span className="text-xs font-medium">{t('nav.home')}</span>
             </button>
             <button
               onClick={() => handleViewChange(View.Quiz)}
               className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-colors ${currentView === View.Quiz ? 'text-blue-600' : 'text-slate-500 hover:bg-slate-100'}`}
             >
               <BrainCircuit size={24} />
-              <span className="text-xs font-medium">Quiz</span>
+              <span className="text-xs font-medium">{t('nav.quiz')}</span>
             </button>
             <button
               onClick={() => handleViewChange(View.ReviewChallenge)}
               className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-colors ${currentView === View.ReviewChallenge ? 'text-orange-500' : 'text-slate-500 hover:bg-slate-100'}`}
             >
               <Target size={24} />
-              <span className="text-xs font-medium">復習</span>
+              <span className="text-xs font-medium">{t('nav.review')}</span>
             </button>
             <button
               onClick={() => handleViewChange(View.ListeningMode)}
               className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-colors ${currentView === View.ListeningMode ? 'text-teal-500' : 'text-slate-500 hover:bg-slate-100'}`}
             >
               <Headphones size={24} />
-              <span className="text-xs font-medium">聞き流し</span>
+              <span className="text-xs font-medium">{t('nav.listening')}</span>
             </button>
             <button
               onClick={() => handleViewChange(View.Translate)}
               className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-colors ${currentView === View.Translate ? 'text-blue-600' : 'text-slate-500 hover:bg-slate-100'}`}
             >
               <Languages size={24} />
-              <span className="text-xs font-medium">翻訳</span>
+              <span className="text-xs font-medium">{t('nav.translate')}</span>
             </button>
             <button
               onClick={() => handleViewChange(View.Chat)}
               className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-colors ${currentView === View.Chat ? 'text-blue-600' : 'text-slate-500 hover:bg-slate-100'}`}
             >
               <MessageSquare size={24} />
-              <span className="text-xs font-medium">AI Chat</span>
+              <span className="text-xs font-medium">{t('nav.chat')}</span>
             </button>
           </div>
         </nav>

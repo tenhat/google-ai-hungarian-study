@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useTranslation, Trans } from 'react-i18next';
 import { View, Word } from '../types';
 import { useWordBank } from '../hooks/useWordBank';
 import { Play, Pause, SkipForward, SkipBack, X, Headphones, Volume2, RotateCw } from 'lucide-react';
@@ -29,6 +30,7 @@ interface ListeningModeProps {
 }
 
 const ListeningMode: React.FC = () => {
+    const { t } = useTranslation();
     // Nav hack: we need to change view. But App.tsx doesn't pass it. 
     // Maybe we just use the bottom nav? 
     // But usually "Modes" fill the screen. 
@@ -207,10 +209,9 @@ const ListeningMode: React.FC = () => {
                 <div className="bg-slate-100 p-6 rounded-full">
                     <Headphones size={48} className="text-slate-400" />
                 </div>
-                <h2 className="text-xl font-bold text-slate-700">学習中の単語がありません</h2>
+                <h2 className="text-xl font-bold text-slate-700">{t('listening.noWordsTitle')}</h2>
                 <p className="text-slate-500 text-center">
-                    まだ学習中（Learning）ステータスの単語がありません。<br/>
-                    クイズやチャットで学習を進めましょう！
+                    <Trans i18nKey="listening.noWordsMessage" components={{ br: <br /> }} />
                 </p>
              </div>
         );
@@ -223,7 +224,7 @@ const ListeningMode: React.FC = () => {
             <div className="w-full flex justify-between items-center text-slate-500 mb-4">
                <div className="flex items-center gap-2">
                    <Headphones size={20} />
-                   <span className="font-semibold text-sm">聞き流しモード</span>
+                   <span className="font-semibold text-sm">{t('listening.title')}</span>
                </div>
                <div className="text-sm font-mono bg-slate-100 px-2 py-1 rounded">
                    {currentIndex + 1} / {words.length}
@@ -240,8 +241,8 @@ const ListeningMode: React.FC = () => {
                     {/* Hungarian */}
                     <div className={`text-center transition-all duration-500 ${currentLang === 'hu1' || currentLang === 'hu2' ? 'scale-110' : 'scale-100 opacity-60'}`}>
                         <h2 className="text-4xl font-bold text-slate-800 mb-2">{currentWord.hungarian}</h2>
-                        {currentLang === 'hu1' && <span className="text-blue-500 text-sm font-medium animate-pulse">読み上げ中...</span>}
-                        {currentLang === 'hu2' && <span className="text-indigo-500 text-sm font-medium animate-pulse">リピート</span>}
+                        {currentLang === 'hu1' && <span className="text-blue-500 text-sm font-medium animate-pulse">{t('listening.reading')}</span>}
+                        {currentLang === 'hu2' && <span className="text-indigo-500 text-sm font-medium animate-pulse">{t('listening.repeat')}</span>}
                     </div>
 
                     {/* Divider */}
@@ -250,7 +251,7 @@ const ListeningMode: React.FC = () => {
                     {/* Japanese */}
                     <div className={`text-center transition-all duration-500 ${currentLang === 'jp' ? 'scale-110' : 'scale-100 opacity-60'}`}>
                          <p className="text-2xl font-medium text-slate-600">{currentWord.japanese}</p>
-                         {currentLang === 'jp' && <span className="text-pink-500 text-sm font-medium animate-pulse">翻訳</span>}
+                         {currentLang === 'jp' && <span className="text-pink-500 text-sm font-medium animate-pulse">{t('listening.translating')}</span>}
                     </div>
 
                 </div>
@@ -258,10 +259,10 @@ const ListeningMode: React.FC = () => {
                 {/* Progress Bar for Word Interval (Simulated visual only for now, or just static) */}
                 <div className="bg-slate-50 p-4 border-t border-slate-100 flex justify-center">
                      <span className="text-xs text-slate-400 font-medium">
-                        {currentLang === 'hu1' && "Hungarian"}
-                        {currentLang === 'hu2' && "Hungarian (Repeat)"}
-                        {currentLang === 'jp' && "Japanese"}
-                        {currentLang === 'waiting' && "Next..."}
+                        {currentLang === 'hu1' && t('listening.statusHu')}
+                        {currentLang === 'hu2' && t('listening.statusHuRepeat')}
+                        {currentLang === 'jp' && t('listening.statusJp')}
+                        {currentLang === 'waiting' && t('listening.statusNext')}
                      </span>
                 </div>
             </div>
@@ -301,13 +302,13 @@ const ListeningMode: React.FC = () => {
                         className="flex items-center gap-2 px-4 py-2 rounded-full bg-slate-50 text-slate-600 hover:bg-slate-100 transition-colors text-sm font-medium"
                      >
                         <Volume2 size={16} />
-                        <span>速度: {playbackRate}x</span>
+                        <span>{t('listening.speed', { rate: playbackRate })}</span>
                      </button>
                 </div>
             </div>
 
             <p className="text-xs text-slate-400 text-center max-w-xs">
-                自動再生: ハンガリー語 → (1秒) → 日本語 → (1秒) → ハンガリー語 → (次へ)
+                {t('listening.autoPlayGuide')}
             </p>
         </div>
     );

@@ -1,5 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { getTranslation, getWordTranslation } from '../services/geminiService';
 import { TranslationResult } from '../types';
 import { Languages, Send, Loader2, BookOpen, ListChecks, Mic, MicOff, ArrowRightLeft } from 'lucide-react';
@@ -55,6 +56,7 @@ declare global {
 }
 
 const Translate: React.FC = () => {
+  const { t } = useTranslation();
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<TranslationResult | null>(null);
@@ -253,13 +255,13 @@ const Translate: React.FC = () => {
             <Languages className="text-indigo-600" size={24} />
           </div>
           <h2 className="text-lg font-bold text-slate-800 tracking-tight">
-            {direction === 'ja_to_hu' ? '日本語 → ハンガリー語' : 'ハンガリー語 → 日本語'}
+            {direction === 'ja_to_hu' ? t('translate.titleJaToHu') : t('translate.titleHuToJa')}
           </h2>
         </div>
         <button
           onClick={toggleDirection}
           className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-all duration-300 transform hover:rotate-180 active:scale-95"
-          title="入れ替える"
+          title={t('translate.swap')}
         >
           <ArrowRightLeft size={20} />
         </button>
@@ -271,7 +273,7 @@ const Translate: React.FC = () => {
           <textarea
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
-            placeholder={direction === 'ja_to_hu' ? "日本語を入力してください..." : "ハンガリー語を入力してください..."}
+            placeholder={direction === 'ja_to_hu' ? t('translate.placeholderJa') : t('translate.placeholderHu')}
             className="w-full p-4 pr-14 border border-slate-200 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 focus:outline-none resize-none bg-slate-50 focus:bg-white shadow-sm transition-all text-lg leading-relaxed text-slate-700 placeholder:text-slate-400"
             rows={3}
             disabled={isLoading || isListening}
@@ -286,7 +288,7 @@ const Translate: React.FC = () => {
                   ? 'bg-red-500 text-white animate-pulse-subtle border-red-400 ring-4 ring-red-100'
                   : 'bg-white text-slate-500 border-slate-200 hover:border-indigo-300 hover:text-indigo-600 hover:shadow-md hover:scale-105'
               } disabled:opacity-50 disabled:hover:scale-100`}
-              title={isListening ? '音声入力を停止' : '音声で入力'}
+              title={isListening ? t('translate.listeningStop') : t('translate.listeningStart')}
             >
               {isListening ? <MicOff size={20} /> : <Mic size={20} />}
             </button>
@@ -296,7 +298,7 @@ const Translate: React.FC = () => {
         {isListening && (
           <div className="mt-3 flex items-center gap-2 text-red-500 text-sm font-medium animate-fade-in pl-1">
             <span className="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse"></span>
-            音声を聞き取り中... ({direction === 'ja_to_hu' ? '日本語' : 'ハンガリー語'})
+            {t('translate.listeningActive', { lang: direction === 'ja_to_hu' ? t('common.japanese') : t('common.hungarian') })}
           </div>
         )}
         <button
@@ -307,12 +309,12 @@ const Translate: React.FC = () => {
           {isLoading ? (
             <>
               <Loader2 className="animate-spin" size={20} />
-              翻訳中...
+              {t('translate.translatingButton')}
             </>
           ) : (
             <>
               <Send size={20} className="transform -rotate-45" />
-              翻訳する
+              {t('translate.translateButton')}
             </>
           )}
         </button>
@@ -327,7 +329,7 @@ const Translate: React.FC = () => {
               <div className="flex items-center gap-3 mb-3">
                 <span className="text-2xl filter drop-shadow-sm">{direction === 'ja_to_hu' ? '🇭🇺' : '🇯🇵'}</span>
                 <h3 className="font-bold text-indigo-900 text-lg">
-                    {direction === 'ja_to_hu' ? 'ハンガリー語翻訳' : '日本語翻訳'}
+                    {direction === 'ja_to_hu' ? t('translate.resultHu') : t('translate.resultJa')}
                 </h3>
               </div>
               <p className="text-xl text-slate-800 leading-relaxed font-medium">
@@ -344,7 +346,7 @@ const Translate: React.FC = () => {
                 <div className="p-1.5 bg-fuchsia-100 rounded-lg">
                   <BookOpen className="text-fuchsia-600" size={20} />
                 </div>
-                <h3 className="font-bold text-fuchsia-900">活用・文法解説</h3>
+                <h3 className="font-bold text-fuchsia-900">{t('translate.grammar')}</h3>
               </div>
               <p className="text-slate-700 whitespace-pre-wrap leading-relaxed text-base">
                 {renderClickableText(result.explanation, result.hungarian, inputText)}
@@ -358,7 +360,7 @@ const Translate: React.FC = () => {
                   <div className="p-1.5 bg-emerald-100 rounded-lg">
                     <ListChecks className="text-emerald-600" size={20} />
                   </div>
-                  <h3 className="font-bold text-emerald-900">重要単語</h3>
+                  <h3 className="font-bold text-emerald-900">{t('translate.importantWords')}</h3>
                 </div>
                 <div className="space-y-3">
                   {result.importantWords.map((word, index) => (
@@ -376,7 +378,7 @@ const Translate: React.FC = () => {
                       </div>
                       <div className="bg-white p-3 rounded-lg border border-slate-100 mt-2">
                         <p className="text-sm text-slate-700 mb-1">
-                          <span className="text-slate-400 mr-2 text-xs uppercase tracking-wider font-bold">Example</span>
+                          <span className="text-slate-400 mr-2 text-xs uppercase tracking-wider font-bold">{t('translate.example')}</span>
                           {renderClickableText(word.example.sentence, word.example.sentence, word.example.translation)}
                         </p>
                         <p className="text-sm text-slate-500 pl-8">
@@ -394,7 +396,7 @@ const Translate: React.FC = () => {
         {!result && !isLoading && (
           <div className="flex flex-col items-center justify-center h-full text-slate-400">
             <Languages size={48} className="mb-4" />
-            <p>{direction === 'ja_to_hu' ? '日本語を入力して翻訳してください' : 'ハンガリー語を入力して翻訳してください'}</p>
+            <p>{direction === 'ja_to_hu' ? t('translate.emptyStateJa') : t('translate.emptyStateHu')}</p>
           </div>
         )}
       </div>
@@ -404,11 +406,11 @@ const Translate: React.FC = () => {
         <div className="absolute inset-0 bg-black/50 flex items-center justify-center p-4 z-50 rounded-xl">
           <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-sm space-y-4">
             <h3 className="text-lg font-bold text-slate-800">
-              単語を追加: {selectedWord}
+              {t('chat.addWordTitle', { word: selectedWord })}
             </h3>
             <div>
               <label className="block text-sm font-medium text-slate-600 mb-1">
-                日本語の意味
+                {t('chat.meaningLabel')}
               </label>
               <div className="relative">
                 <input
@@ -416,7 +418,7 @@ const Translate: React.FC = () => {
                   value={japaneseMeaning}
                   onChange={(e) => setJapaneseMeaning(e.target.value)}
                   className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none pr-8"
-                  placeholder={isTranslating ? '翻訳中...' : '例: りんご'}
+                  placeholder={isTranslating ? t('chat.translating') : t('chat.meaningPlaceholder')}
                   autoFocus
                 />
                 {isTranslating && (
@@ -428,26 +430,26 @@ const Translate: React.FC = () => {
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-600 mb-1">
-                例文
+                {t('chat.exampleLabel')}
               </label>
               <textarea
                 value={exampleSentence}
                 onChange={(e) => setExampleSentence(e.target.value)}
                 className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
                 rows={2}
-                placeholder="例文を入力..."
+                placeholder={t('chat.examplePlaceholder')}
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-600 mb-1">
-                例文の意味 (日本語)
+                {t('chat.exampleMeaningLabel')}
               </label>
               <textarea
                 value={exampleTranslation}
                 onChange={(e) => setExampleTranslation(e.target.value)}
                 className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
                 rows={2}
-                placeholder="例文の日本語訳を入力..."
+                placeholder={t('chat.exampleMeaningPlaceholder')}
               />
             </div>
             <div className="flex justify-end gap-2 pt-2">
@@ -455,14 +457,14 @@ const Translate: React.FC = () => {
                 onClick={() => setIsModalOpen(false)}
                 className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg"
               >
-                キャンセル
+                {t('common.cancel')}
               </button>
               <button
                 onClick={handleSaveWord}
                 disabled={!japaneseMeaning.trim() || isTranslating}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-slate-300 transition-colors"
               >
-                追加
+                {t('chat.add')}
               </button>
             </div>
           </div>

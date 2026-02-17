@@ -1,11 +1,13 @@
 
 import React, { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { getChatResponse, getGrammarCorrection, getWordTranslation, getDailyQuestion, getImageChatResponse } from '../services/geminiService';
 import { ChatMessage } from '../types';
 import { Send, CheckCircle, AlertCircle, Sparkles, Loader2, Camera, X, Trash2 } from 'lucide-react';
 import { useWordBank } from '../hooks/useWordBank';
 
 const Chat: React.FC = () => {
+  const { t } = useTranslation();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [userInput, setUserInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -119,7 +121,7 @@ const Chat: React.FC = () => {
 
     // ファイルサイズチェック (10MB制限 - リサイズ前)
     if (file.size > 10 * 1024 * 1024) {
-      alert('画像サイズが大きすぎます。10MB以下の画像を選択してください。');
+      alert(t('chat.imageTooLarge'));
       return;
     }
 
@@ -130,7 +132,7 @@ const Chat: React.FC = () => {
       setImageMimeType('image/jpeg'); // リサイズ後は常にJPEG
     } catch (error) {
       console.error('Error resizing image:', error);
-      alert('画像の処理に失敗しました。別の画像をお試しください。');
+      alert(t('chat.imageProcessError'));
     }
   };
 
@@ -199,7 +201,7 @@ const Chat: React.FC = () => {
     const userMessage: ChatMessage = {
       id: `user-img-${Date.now()}`,
       role: 'user',
-      text: '📷 画像を送信しました',
+      text: t('chat.imageSent'),
       imageUrl: selectedImage,
       timestamp: Date.now(),
     };
@@ -229,7 +231,7 @@ const Chat: React.FC = () => {
         id: `model-error-${Date.now()}`,
         role: 'model',
         text: 'Sajnos hiba történt a kép feldolgozása során.',
-        translation: '画像の処理中にエラーが発生しました。',
+        translation: t('chat.imageProcessError'),
         timestamp: Date.now(),
       };
       setMessages(prev => [...prev, errorMessage]);
@@ -249,7 +251,7 @@ const Chat: React.FC = () => {
 
   // チャット履歴を初期化
   const handleClearHistory = () => {
-    if (window.confirm('チャット履歴を削除しますか？この操作は取り消せません。')) {
+    if (window.confirm(t('chat.confirmClearHistory'))) {
       setMessages([]);
       localStorage.removeItem('hungarian-study-tenju-chat-history');
     }
@@ -342,12 +344,12 @@ const Chat: React.FC = () => {
             <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-500 to-indigo-500 flex items-center justify-center text-white shadow-md animate-pulse-subtle">
                 <Sparkles size={16} />
             </div>
-            <h2 className="text-lg font-bold text-slate-700 tracking-tight">AI Chat Partner</h2>
+            <h2 className="text-lg font-bold text-slate-700 tracking-tight">{t('chat.title')}</h2>
         </div>
         <button
           onClick={handleClearHistory}
           className="text-slate-400 hover:text-red-500 p-2 hover:bg-red-50 rounded-full transition-all duration-300"
-          title="履歴を削除"
+          title={t('chat.clearHistory')}
         >
           <Trash2 size={18} />
         </button>
@@ -359,7 +361,7 @@ const Chat: React.FC = () => {
                 <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
                     <Sparkles size={32} className="text-slate-300" />
                 </div>
-                <p className="text-sm font-medium">会話を始めましょう (Kezdjünk beszélgetni!)</p>
+                <p className="text-sm font-medium">{t('chat.startConversation')}</p>
             </div>
         )}
         {messages.map((message, index) => (
@@ -383,7 +385,7 @@ const Chat: React.FC = () => {
                 <div className="mb-3 overflow-hidden rounded-lg border border-white/20">
                     <img 
                     src={message.imageUrl} 
-                    alt="送信した画像" 
+                    alt="Sent image" 
                     className="max-w-full w-full h-auto object-cover transform hover:scale-105 transition-transform duration-500"
                     />
                 </div>
@@ -455,7 +457,7 @@ const Chat: React.FC = () => {
                         <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
                         <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
                     </div>
-                    <p className="text-xs text-slate-400 mt-2 font-medium">考え中...</p>
+                    <p className="text-xs text-slate-400 mt-2 font-medium">{t('chat.thinking')}</p>
                 </div>
             </div>
         )}
@@ -468,27 +470,27 @@ const Chat: React.FC = () => {
             <div className="relative group">
                 <img 
                 src={selectedImage} 
-                alt="プレビュー" 
+                alt="Preview" 
                 className="w-20 h-20 object-cover rounded-lg border border-slate-100"
                 />
                 <div className="absolute inset-0 bg-black/10 rounded-lg group-hover:bg-black/20 transition-colors" />
             </div>
             
             <div className="flex flex-col gap-2 flex-grow justify-center">
-              <p className="text-sm font-medium text-slate-700">この画像を送信しますか？</p>
+              <p className="text-sm font-medium text-slate-700">{t('chat.imageSendPrompt')}</p>
               <div className="flex gap-2">
                 <button 
                   onClick={handleImageSend}
                   disabled={isLoading}
                   className="px-4 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-200 disabled:bg-slate-300 disabled:shadow-none transition-all text-sm font-bold flex items-center gap-1"
                 >
-                  <Send size={14} /> 送信
+                  <Send size={14} /> {t('chat.send')}
                 </button>
                 <button 
                   onClick={handleCancelImage}
                   className="px-4 py-1.5 text-slate-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors text-sm font-medium"
                 >
-                  キャンセル
+                  {t('chat.cancel')}
                 </button>
               </div>
             </div>
@@ -511,7 +513,7 @@ const Chat: React.FC = () => {
           <label 
             htmlFor="camera-input"
             className="text-slate-400 hover:text-blue-600 hover:bg-blue-50 p-3 rounded-xl cursor-pointer transition-all duration-300 transform hover:scale-105 active:scale-95"
-            title="画像をアップロード"
+            title="Upload Image"
           >
             <Camera size={22} />
           </label>
@@ -520,7 +522,7 @@ const Chat: React.FC = () => {
             type="text"
             value={userInput}
             onChange={(e) => setUserInput(e.target.value)}
-            placeholder="ハンガリー語でメッセージを入力..."
+            placeholder={t('chat.placeholder')}
             className="flex-grow p-3 bg-slate-50 border-transparent focus:bg-white border focus:border-blue-200 rounded-xl focus:ring-4 focus:ring-blue-50/50 focus:outline-none transition-all placeholder:text-slate-400 text-slate-700"
             disabled={isLoading}
           />
@@ -540,16 +542,16 @@ const Chat: React.FC = () => {
       {isModalOpen && (
         <div className="absolute inset-0 bg-black/50 flex items-center justify-center p-4 z-50 rounded-xl">
             <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-sm space-y-4">
-                <h3 className="text-lg font-bold text-slate-800">単語を追加: {selectedWord}</h3>
+                <h3 className="text-lg font-bold text-slate-800">{t('chat.addWordTitle', { word: selectedWord })}</h3>
                 <div>
-                    <label className="block text-sm font-medium text-slate-600 mb-1">日本語の意味</label>
+                    <label className="block text-sm font-medium text-slate-600 mb-1">{t('chat.meaningLabel')}</label>
                     <div className="relative">
                         <input 
                             type="text" 
                             value={japaneseMeaning}
                             onChange={(e) => setJapaneseMeaning(e.target.value)}
                             className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none pr-8"
-                            placeholder={isTranslating ? "翻訳中..." : "例: りんご"}
+                            placeholder={isTranslating ? t('chat.translating') : t('chat.meaningPlaceholder')}
                             autoFocus
                         />
                         {isTranslating && (
@@ -560,23 +562,23 @@ const Chat: React.FC = () => {
                     </div>
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-slate-600 mb-1">例文 (自動抽出)</label>
+                    <label className="block text-sm font-medium text-slate-600 mb-1">{t('chat.exampleLabel')}</label>
                     <textarea 
                         value={exampleSentence}
                         onChange={(e) => setExampleSentence(e.target.value)}
                         className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
                         rows={2}
-                        placeholder="例文を入力..."
+                        placeholder={t('chat.examplePlaceholder')}
                     />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-slate-600 mb-1">例文の意味 (日本語)</label>
+                    <label className="block text-sm font-medium text-slate-600 mb-1">{t('chat.exampleMeaningLabel')}</label>
                     <textarea 
                         value={exampleTranslation}
                         onChange={(e) => setExampleTranslation(e.target.value)}
                         className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
                         rows={2}
-                        placeholder="例文の日本語訳を入力..."
+                        placeholder={t('chat.exampleMeaningPlaceholder')}
                     />
                 </div>
                 <div className="flex justify-end gap-2 pt-2">
@@ -584,14 +586,14 @@ const Chat: React.FC = () => {
                         onClick={() => setIsModalOpen(false)}
                         className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg"
                     >
-                        キャンセル
+                        {t('chat.cancel')}
                     </button>
                     <button 
                         onClick={handleSaveWord}
                         disabled={!japaneseMeaning.trim() || isTranslating}
                         className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-slate-300 transition-colors"
                     >
-                        追加
+                        {t('chat.add')}
                     </button>
                 </div>
             </div>
