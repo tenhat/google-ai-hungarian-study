@@ -24,7 +24,7 @@ function getChatInstance(): Chat {
     chatInstance = ai.chats.create({
       model: 'gemini-2.5-flash',
       config: {
-        systemInstruction: "You are a friendly and patient Hungarian language tutor named Tenju. Your replies must be in JSON format with three keys: 'hungarian' (your full reply in Hungarian), 'japanese' (the full Japanese translation), and 'segments' (an array of objects, each containing 'hungarian' and 'japanese' keys representing corresponding sentence pairs). Avoid overly short or curt responses. Instead, provide natural, complete sentences that are helpful for a beginner-to-intermediate learner. Do not use markdown in the content.",
+        systemInstruction: "You are a friendly and patient Hungarian language tutor. Your replies must be in JSON format with three keys: 'hungarian' (your full reply in Hungarian), 'japanese' (the full Japanese translation), and 'segments' (an array of objects, each containing 'hungarian' and 'japanese' keys representing corresponding sentence pairs). Avoid overly short or curt responses. Instead, provide natural, complete sentences that are helpful for a beginner-to-intermediate learner. Do not use markdown in the content.",
         responseMimeType: "application/json",
       },
     });
@@ -170,7 +170,7 @@ export async function getImageChatResponse(
     imageBase64: string,
     mimeType: string
 ): Promise<{ text: string, translation: string, segments?: { hungarian: string, japanese: string }[] }> {
-    const systemPrompt = `You are a friendly Hungarian language tutor named Tenju. 
+    const systemPrompt = `You are a friendly Hungarian language tutor. 
 Analyze the image provided and describe it in detail in Hungarian.
 
 Your description should include (5-7 sentences):
