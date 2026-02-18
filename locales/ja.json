@@ -157,7 +157,12 @@
     "emptyStateHu": "ハンガリー語を入力して翻訳してください",
     "placeholder": "翻訳したいテキストを入力...",
     "result": "翻訳結果",
-    "explanation": "文法解説"
+    "explanation": "文法解説",
+    "titleEnToHu": "英語 → ハンガリー語",
+    "titleHuToEn": "ハンガリー語 → 英語",
+    "placeholderEn": "英語を入力してください...",
+    "emptyStateEn": "英語を入力して翻訳してください",
+    "resultEn": "英語翻訳"
   },
   "common": {
     "loading": "読み込み中...",

@@ -59,13 +59,13 @@ declare global {
 }
 
 const Translate: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const { consumeTokens, hasEnoughTokens } = useTokens();
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<TranslationResult | null>(null);
-  const [direction, setDirection] = useState<'ja_to_hu' | 'hu_to_ja'>('ja_to_hu');
+  const [direction, setDirection] = useState<'ja_to_hu' | 'hu_to_ja' | 'en_to_hu' | 'hu_to_en'>('ja_to_hu');
   const { addNewWord } = useWordBank();
 
   // トークン確認モーダルの状態
@@ -86,6 +86,7 @@ const Translate: React.FC = () => {
   const [isTranslating, setIsTranslating] = useState(false);
 
   // 音声認識の初期化
+  // 音声認識の初期化
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
@@ -93,7 +94,12 @@ const Translate: React.FC = () => {
       const recognition = new SpeechRecognition();
       recognition.continuous = false;
       recognition.interimResults = true;
-      recognition.lang = direction === 'ja_to_hu' ? 'ja-JP' : 'hu-HU'; // 言語切り替え
+      
+      let lang = 'hu-HU';
+      if (direction === 'ja_to_hu') lang = 'ja-JP';
+      else if (direction === 'en_to_hu') lang = 'en-US';
+      
+      recognition.lang = lang;
 
       recognition.onstart = () => {
         setIsListening(true);
@@ -134,7 +140,16 @@ const Translate: React.FC = () => {
         recognitionRef.current.abort();
       }
     };
-  }, [direction]); // direction が変わったら再設定
+  }, [direction]); 
+
+  // 言語設定が変更されたときに翻訳方向をリセット
+  useEffect(() => {
+    if (i18n.language === 'en') {
+      setDirection('en_to_hu');
+    } else {
+      setDirection('ja_to_hu');
+    }
+  }, [i18n.language]);
 
   // 音声入力の開始/停止
   const toggleListening = () => {
@@ -142,7 +157,10 @@ const Translate: React.FC = () => {
     
     // 現在の言語設定を確実に反映
     if (!isListening) {
-        recognitionRef.current.lang = direction === 'ja_to_hu' ? 'ja-JP' : 'hu-HU';
+        let lang = 'hu-HU';
+        if (direction === 'ja_to_hu') lang = 'ja-JP';
+        else if (direction === 'en_to_hu') lang = 'en-US';
+        recognitionRef.current.lang = lang;
     }
 
     if (isListening) {
@@ -210,7 +228,13 @@ const Translate: React.FC = () => {
 
   // 言語切り替え
   const toggleDirection = () => {
-    setDirection(prev => prev === 'ja_to_hu' ? 'hu_to_ja' : 'ja_to_hu');
+    setDirection(prev => {
+        if (prev === 'ja_to_hu') return 'hu_to_ja';
+        if (prev === 'hu_to_ja') return 'ja_to_hu';
+        if (prev === 'en_to_hu') return 'hu_to_en';
+        if (prev === 'hu_to_en') return 'en_to_hu';
+        return 'ja_to_hu';
+    });
     setResult(null);
     setInputText('');
   };
@@ -315,7 +339,10 @@ const Translate: React.FC = () => {
             <Languages className="text-indigo-600" size={24} />
           </div>
           <h2 className="text-lg font-bold text-slate-800 tracking-tight">
-            {direction === 'ja_to_hu' ? t('translate.titleJaToHu') : t('translate.titleHuToJa')}
+            {direction === 'ja_to_hu' ? t('translate.titleJaToHu') : 
+             direction === 'hu_to_ja' ? t('translate.titleHuToJa') :
+             direction === 'en_to_hu' ? t('translate.titleEnToHu') :
+             t('translate.titleHuToEn')}
           </h2>
         </div>
         <button
@@ -333,7 +360,11 @@ const Translate: React.FC = () => {
           <textarea
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
-            placeholder={direction === 'ja_to_hu' ? t('translate.placeholderJa') : t('translate.placeholderHu')}
+            placeholder={
+                direction === 'ja_to_hu' ? t('translate.placeholderJa') : 
+                direction === 'en_to_hu' ? t('translate.placeholderEn') :
+                t('translate.placeholderHu')
+            }
             className="w-full p-4 pr-14 border border-slate-200 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 focus:outline-none resize-none bg-slate-50 focus:bg-white shadow-sm transition-all text-lg leading-relaxed text-slate-700 placeholder:text-slate-400"
             rows={3}
             disabled={isLoading || isListening}
@@ -358,7 +389,11 @@ const Translate: React.FC = () => {
         {isListening && (
           <div className="mt-3 flex items-center gap-2 text-red-500 text-sm font-medium animate-fade-in pl-1">
             <span className="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse"></span>
-            {t('translate.listeningActive', { lang: direction === 'ja_to_hu' ? t('common.japanese') : t('common.hungarian') })}
+            {t('translate.listeningActive', { 
+                lang: direction === 'ja_to_hu' ? t('common.japanese') : 
+                      direction === 'en_to_hu' ? 'English' : 
+                      t('common.hungarian') 
+            })}
           </div>
         )}
         <button
@@ -387,15 +422,21 @@ const Translate: React.FC = () => {
             {/* 翻訳結果 */}
             <div className="bg-white p-5 rounded-xl shadow-sm border-l-4 border-indigo-500 animate-slide-up ring-1 ring-slate-100">
               <div className="flex items-center gap-3 mb-3">
-                <span className="text-2xl filter drop-shadow-sm">{direction === 'ja_to_hu' ? '🇭🇺' : '🇯🇵'}</span>
+                <span className="text-2xl filter drop-shadow-sm">{
+                    (direction === 'ja_to_hu' || direction === 'en_to_hu') ? '🇭🇺' : 
+                    direction === 'hu_to_ja' ? '🇯🇵' : '🇺🇸'
+                }</span>
                 <h3 className="font-bold text-indigo-900 text-lg">
-                    {direction === 'ja_to_hu' ? t('translate.resultHu') : t('translate.resultJa')}
+                    {direction === 'ja_to_hu' ? t('translate.resultHu') : 
+                     direction === 'hu_to_ja' ? t('translate.resultJa') :
+                     direction === 'en_to_hu' ? t('translate.resultHu') :
+                     t('translate.resultEn')}
                 </h3>
               </div>
               <p className="text-xl text-slate-800 leading-relaxed font-medium">
-                {direction === 'ja_to_hu' 
+                {(direction === 'ja_to_hu' || direction === 'en_to_hu')
                     ? renderClickableText(result.hungarian, result.hungarian, inputText)
-                    : (result.japanese || result.explanation) /* フォールバック */
+                    : (direction === 'hu_to_en' ? result.english : result.japanese) || result.explanation
                 }
               </p>
             </div>
@@ -434,7 +475,12 @@ const Translate: React.FC = () => {
                           {renderClickableText(word.hungarian, word.example.sentence, word.example.translation)}
                         </span>
                         <span className="text-slate-400">→</span>
-                        <span className="text-slate-800 font-medium">{word.japanese}</span>
+                        <span className="text-slate-800 font-medium">
+                            {(direction === 'en_to_hu' || direction === 'hu_to_en') 
+                                ? (word.english || word.japanese) 
+                                : word.japanese
+                            }
+                        </span>
                       </div>
                       <div className="bg-white p-3 rounded-lg border border-slate-100 mt-2">
                         <p className="text-sm text-slate-700 mb-1">
@@ -456,7 +502,11 @@ const Translate: React.FC = () => {
         {!result && !isLoading && (
           <div className="flex flex-col items-center justify-center h-full text-slate-400">
             <Languages size={48} className="mb-4" />
-            <p>{direction === 'ja_to_hu' ? t('translate.emptyStateJa') : t('translate.emptyStateHu')}</p>
+            <p>
+                {direction === 'ja_to_hu' ? t('translate.emptyStateJa') : 
+                 direction === 'en_to_hu' ? t('translate.emptyStateEn') :
+                 t('translate.emptyStateHu')}
+            </p>
           </div>
         )}
       </div>

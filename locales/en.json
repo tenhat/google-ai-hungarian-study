@@ -157,7 +157,12 @@
     "emptyStateHu": "Enter Hungarian to translate",
     "placeholder": "Enter text to translate...",
     "result": "Result",
-    "explanation": "Grammar Explanation"
+    "explanation": "Grammar Explanation",
+    "titleEnToHu": "English → Hungarian",
+    "titleHuToEn": "Hungarian → English",
+    "placeholderEn": "Enter English...",
+    "emptyStateEn": "Enter English to translate",
+    "resultEn": "English Translation"
   },
   "common": {
     "loading": "Loading...",
