@@ -6,10 +6,11 @@ import Translate from './components/Translate';
 import ReviewChallenge from './components/ReviewChallenge';
 import ListeningMode from './components/ListeningMode';
 import PlacementTest from './components/PlacementTest';
+import StudyStats from './components/StudyStats';
 import { WordBankProvider } from './hooks/useWordBank';
 import { View } from './types';
 import Header from './components/shared/Header';
-import { BrainCircuit, MessageSquare, HomeIcon, Languages, Target, Headphones } from 'lucide-react';
+import { BrainCircuit, MessageSquare, HomeIcon, Languages, Target, Headphones, BarChart } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { AuthProvider } from './contexts/AuthContext';
@@ -42,6 +43,8 @@ const App: React.FC = () => {
         return <ListeningMode />;
       case View.PlacementTest:
         return <PlacementTest setCurrentView={handleViewChange} />;
+      case View.StudyStats:
+        return <StudyStats />;
       case View.Home:
       default:
         return <Home setCurrentView={handleViewChange} />;
@@ -103,6 +106,13 @@ const App: React.FC = () => {
             >
               <MessageSquare size={24} />
               <span className="text-xs font-medium">{t('nav.chat')}</span>
+            </button>
+            <button
+              onClick={() => handleViewChange(View.StudyStats)}
+              className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-colors ${currentView === View.StudyStats ? 'text-blue-600' : 'text-slate-500 hover:bg-slate-100'}`}
+            >
+              <BarChart size={24} />
+              <span className="text-xs font-medium">学習記録</span>
             </button>
           </div>
         </nav>

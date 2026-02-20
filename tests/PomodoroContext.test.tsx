@@ -3,6 +3,24 @@ import { render, screen, act, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { PomodoroProvider, usePomodoro } from '../contexts/PomodoroContext';
 
+// AuthContextをモック
+vi.mock('../contexts/AuthContext', () => ({
+  useAuth: () => ({
+    user: { uid: 'test-user-id' }
+  })
+}));
+
+// Firestore関連をモック
+vi.mock('firebase/firestore', () => ({
+  collection: vi.fn(),
+  addDoc: vi.fn(),
+  serverTimestamp: vi.fn(),
+}));
+
+vi.mock('../services/firebase', () => ({
+  db: {}
+}));
+
 // テスト用コンポーネント
 const TestComponent = () => {
   const {

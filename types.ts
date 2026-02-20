@@ -1,4 +1,3 @@
-
 export interface Word {
   id: string;
   hungarian: string;
@@ -36,6 +35,7 @@ export enum View {
   ReviewChallenge = 'ReviewChallenge',
   ListeningMode = 'ListeningMode',
   PlacementTest = 'PlacementTest',
+  StudyStats = 'StudyStats', // 追加
 }
 
 export type CEFRLevel = 'A1' | 'A2' | 'B1' | 'B2' | 'C1';
@@ -100,3 +100,11 @@ export const TOKEN_COSTS = {
 
 // 無料トークンの週間付与量
 export const FREE_TOKEN_WEEKLY_LIMIT = 100;
+
+// --- 学習記録 ---
+export interface StudySession {
+  id: string;
+  date: string; // ISO 8601 (例: '2023-10-27T10:00:00.000Z')
+  durationMinutes: number; // 学習時間（分）
+  type: 'pomodoro_work' | 'other'; // 学習の種類
+}
