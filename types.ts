@@ -35,7 +35,10 @@ export enum View {
   Translate = 'Translate',
   ReviewChallenge = 'ReviewChallenge',
   ListeningMode = 'ListeningMode',
+  PlacementTest = 'PlacementTest',
 }
+
+export type CEFRLevel = 'A1' | 'A2' | 'B1' | 'B2' | 'C1';
 
 export enum QuizMode {
   HuToJp,

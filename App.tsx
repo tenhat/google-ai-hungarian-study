@@ -5,6 +5,7 @@ import Chat from './components/Chat';
 import Translate from './components/Translate';
 import ReviewChallenge from './components/ReviewChallenge';
 import ListeningMode from './components/ListeningMode';
+import PlacementTest from './components/PlacementTest';
 import { WordBankProvider } from './hooks/useWordBank';
 import { View } from './types';
 import Header from './components/shared/Header';
@@ -38,6 +39,8 @@ const App: React.FC = () => {
         return <ReviewChallenge />;
       case View.ListeningMode:
         return <ListeningMode />;
+      case View.PlacementTest:
+        return <PlacementTest setCurrentView={handleViewChange} />;
       case View.Home:
       default:
         return <Home setCurrentView={handleViewChange} />;

@@ -2,7 +2,8 @@
 import React, { useState } from 'react';
 import { View, WordStatus } from '../types';
 import { useWordBank } from '../hooks/useWordBank';
-import { BrainCircuit, MessageSquare, CheckCircle, Clock, Star, Loader } from 'lucide-react';
+import { useHungarianLevel } from '../hooks/useHungarianLevel';
+import { BrainCircuit, MessageSquare, CheckCircle, Clock, Star, Loader, Award } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import WordList from './WordList';
 
@@ -13,6 +14,7 @@ interface HomeProps {
 const Home: React.FC<HomeProps> = ({ setCurrentView }) => {
   const { t } = useTranslation();
   const { getStats, getWordsForQuiz, loading, quizSessionSize, setQuizSessionSize } = useWordBank();
+  const { level: hungarianLevel, loading: levelLoading } = useHungarianLevel();
   const [selectedStatus, setSelectedStatus] = useState<WordStatus | null>(null);
   
   const stats = getStats();
@@ -32,6 +34,19 @@ const Home: React.FC<HomeProps> = ({ setCurrentView }) => {
       <div className="text-center animate-slide-up">
         <h2 className="text-3xl font-bold text-slate-800">Üdvözöljük!</h2>
         <p className="text-slate-500 mt-2">{t('home.title')}</p>
+        
+        {/* レベル表示 */}
+        <div className="mt-4 flex flex-col items-center justify-center">
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-indigo-100 rounded-full px-6 py-2 shadow-sm flex items-center gap-3">
+            <Award size={20} className="text-indigo-600" />
+            <span className="text-sm font-medium text-slate-600">あなたの現在レベル:</span>
+            {!levelLoading ? (
+              <span className="text-lg font-bold text-indigo-700">{hungarianLevel || '未診断'}</span>
+            ) : (
+              <Loader className="animate-spin text-indigo-400" size={16} />
+            )}
+          </div>
+        </div>
       </div>
 
       <div className="w-full max-w-md bg-white p-6 rounded-xl shadow-xl border border-slate-100 space-y-4 animate-slide-up" style={{ animationDelay: '100ms' }}>
@@ -117,6 +132,14 @@ const Home: React.FC<HomeProps> = ({ setCurrentView }) => {
           onClick={() => setCurrentView(View.ListeningMode)}
           className="bg-gradient-to-br from-teal-500 to-emerald-500 hover:shadow-teal-200"
           delay="800ms"
+        />
+        <ActionButton
+          icon={<Award size={32} />}
+          title="レベル判定テスト"
+          subtitle="あなたの実力を測定"
+          onClick={() => setCurrentView(View.PlacementTest)}
+          className="bg-gradient-to-br from-rose-500 to-pink-600 hover:shadow-rose-200"
+          delay="900ms"
         />
       </div>
 
