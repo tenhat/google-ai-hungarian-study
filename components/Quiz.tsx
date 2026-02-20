@@ -159,6 +159,10 @@ const Quiz: React.FC<QuizProps> = ({ setCurrentView }) => {
     // Mark as incorrect
     setSelectedOption('__GIVE_UP__'); // Special value to indicate give up
     setIsCorrect(false);
+    
+    // わからない場合も音声を再生
+    playAudio();
+
     updateWordProgress(currentWord.id, false);
     // 画面を一番上にスクロール（iOS Safari対応）
     window.scrollTo(0, 0);

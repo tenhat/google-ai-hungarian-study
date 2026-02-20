@@ -165,6 +165,10 @@ const ReviewChallenge: React.FC = () => {
     
     setSelectedOption('__GIVE_UP__');
     setIsCorrect(false);
+    
+    // わからない場合も音声を再生
+    playAudio();
+
     setIncorrectCount(prev => prev + 1);
     resetWordProgress(currentWord.id);
   };
