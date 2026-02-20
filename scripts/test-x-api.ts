@@ -31,15 +31,23 @@ async function testXApi() {
 
   try {
     console.log('\nTesting Write Access (Creating a draft/dummy tweet)...');
-    // Just a basic text without URLs or hashtags to avoid spam filters
+    // First, test simple text
     const testText = `API connection test: ${new Date().toISOString()}`;
-    const response = await client.v2.tweet(testText);
-    console.log('✅ Write Access OK! Tweet ID:', response.data.id);
+    const response1 = await client.v2.tweet(testText);
+    console.log('✅ Write Access OK (Plain Text)! Tweet ID:', response1.data.id);
     
     // Clean up
-    console.log('Deleting test tweet...');
-    await client.v2.deleteTweet(response.data.id);
-    console.log('✅ Test tweet deleted.');
+    await client.v2.deleteTweet(response1.data.id);
+    
+    // Next, test URL
+    console.log('\nTesting Write Access with URL...');
+    const urlText = `API URL test: https://hungarian-study-tenju.web.app/ ${new Date().toISOString()}`;
+    const response2 = await client.v2.tweet(urlText);
+    console.log('✅ Write Access OK (With URL)! Tweet ID:', response2.data.id);
+    
+    // Clean up
+    await client.v2.deleteTweet(response2.data.id);
+
   } catch (error: any) {
     console.error('❌ Write Access Failed:', error?.data || error);
   }
