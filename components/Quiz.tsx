@@ -1,9 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useWordBank } from '../hooks/useWordBank';
-import { Word, QuizMode } from '../types';
+import { Word, QuizMode, View } from '../types';
 import { ArrowRight, Volume2, Check, X, CheckCircle, HelpCircle, XCircle } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useTranslation } from 'react-i18next';
+
+interface QuizProps {
+  setCurrentView: (view: View) => void;
+}
 
 
 const highlightWordInSentence = (sentence: string, wordToHighlight: string) => {
@@ -28,7 +32,7 @@ const highlightWordInSentence = (sentence: string, wordToHighlight: string) => {
   );
 };
 
-const Quiz: React.FC = () => {
+const Quiz: React.FC<QuizProps> = ({ setCurrentView }) => {
   const { t } = useTranslation();
   const { words, getWordsForQuiz, updateWordProgress, getWordById, progress, markAsMastered, loading, quizSessionSize } = useWordBank();
   
@@ -43,13 +47,18 @@ const Quiz: React.FC = () => {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [quizMode, setQuizMode] = useState<QuizMode>(QuizMode.HuToJp);
+  const [hasInitialized, setHasInitialized] = useState(false);
 
   const currentItem = useMemo(() => quizItems[currentIndex], [quizItems, currentIndex]);
   const currentWord = useMemo(() => currentItem?.word, [currentItem]);
 
   useEffect(() => {
     // Only load quiz words if we don't have them yet and words are loaded
-    if (quizItems.length === 0 && words.length > 0) {
+    if (!hasInitialized && !loading) {
+      if (words.length === 0) {
+        setHasInitialized(true);
+        return;
+      }
       const dueWords = getWordsForQuiz(quizSessionSize);
       
       // Generate Quiz Items
@@ -79,9 +88,10 @@ const Quiz: React.FC = () => {
 
       setQuizItems(newQuizItems);
       setCurrentIndex(0);
+      setHasInitialized(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [words.length]);
+  }, [loading, words.length, hasInitialized, getWordsForQuiz, quizSessionSize]);
 
   useEffect(() => {
     if (currentWord) {
@@ -107,6 +117,7 @@ const Quiz: React.FC = () => {
         setCurrentIndex(prev => prev + 1);
     } else {
         // Quiz finished, reload new set
+        setHasInitialized(false);
         setQuizItems([]);
         setCurrentIndex(0);
     }
@@ -196,18 +207,24 @@ const Quiz: React.FC = () => {
   }, [currentWord]);
 
 
-  if (loading || (quizItems.length === 0 && words.length > 0)) {
+  if (loading || !hasInitialized) {
      // Show loading or empty state if needed
      return <div className="text-center p-4">{t('common.loading')}</div>; 
   }
 
   if (quizItems.length === 0) {
     return (
-      <div className="flex-grow flex flex-col justify-center items-center text-center p-4">
-        <div className="bg-white p-8 rounded-xl shadow-lg animate-scale-in">
-          <div className="text-6xl mb-4">🎉</div>
-          <h2 className="text-2xl font-bold text-green-600 mb-2">{t('quiz.completedTitle')}</h2>
-          <p className="text-slate-500">{t('quiz.allReviewed')}</p>
+      <div className="flex flex-col items-center justify-center min-h-[400px] text-center p-6 sm:p-12">
+        <div className="bg-white p-8 rounded-2xl shadow-xl animate-scale-in max-w-md w-full">
+          <div className="text-7xl mb-6">🎉</div>
+          <h2 className="text-3xl font-bold text-green-600 mb-2">{t('quiz.completedTitle')}</h2>
+          <p className="text-slate-600 mb-8">{t('quiz.completedMessage')}</p>
+          <button
+            onClick={() => setCurrentView(View.Home)}
+            className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold py-4 px-8 rounded-xl hover:shadow-lg hover:shadow-blue-200 transition-all active:scale-95"
+          >
+            {t('quiz.backToHome')}
+          </button>
         </div>
       </div>
     );

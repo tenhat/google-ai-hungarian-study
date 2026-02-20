@@ -30,7 +30,7 @@ const App: React.FC = () => {
   const renderView = () => {
     switch (currentView) {
       case View.Quiz:
-        return <Quiz />;
+        return <Quiz setCurrentView={handleViewChange} />;
       case View.Chat:
         return <Chat />;
       case View.Translate:

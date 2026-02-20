@@ -57,6 +57,7 @@
     "listening": "音声を聞く",
     "skipTooltip": "既にこの単語を知っていますか？スキップします。",
     "completedTitle": "完了！",
+    "completedMessage": "お疲れ様でした！この調子で学習を続けていきましょう。",
     "allReviewed": "今日の復習はすべて終わりました。素晴らしい！",
     "unknown": "わからない",
     "correctAnswerPrefix": "正解: ",
