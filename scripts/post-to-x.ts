@@ -42,6 +42,9 @@ async function postToX() {
     accessSecret,
   });
 
+  // (Step2) 明示的に読み書き権限を持つv2クライアントを指定
+  const rwClient = client.readWrite.v2;
+
   // 3. Select a pattern based on the current day (Day of the year)
   // This ensures a predictable rotation of the promotional messages.
   const now = new Date();
@@ -66,7 +69,7 @@ async function postToX() {
       console.log('DRY_RUN is enabled. Skipping actual post to X.');
     } else {
       console.log('Sending post to X...');
-      const response = await client.v2.tweet(postContent);
+      const response = await rwClient.tweet(postContent);
       console.log('Successfully posted to X!');
       console.log(`Tweet ID: ${response.data.id}`);
     }
