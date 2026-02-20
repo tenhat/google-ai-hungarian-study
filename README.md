@@ -1,4 +1,4 @@
-# Hungarian Study Tenju
+# Kontextus
 
 [English](#english) | [日本語](#japanese)
 
@@ -8,7 +8,7 @@
 ## English
 
 An interactive Hungarian language learning web application powered by Google Gemini AI.
-Instead of random learning at the vocabulary level, it aims to help you acquire Hungarian efficiently and practically by **collecting words you actually use in your daily life and creating your own original vocabulary book**.
+Instead of random learning at the vocabulary level, **Kontextus** aims to help you acquire Hungarian efficiently and practically by **collecting words you actually use in your daily life and creating your own original vocabulary book**.
 It supports your learning with a variety of features, including chatting with an AI language tutor, translations with grammar explanations, and learning through image analysis.
 
 ### Features
@@ -115,7 +115,7 @@ This project is developed for educational and research purposes.
 ## 日本語
 
 Google Gemini AIを活用した、インタラクティブなハンガリー語学習Webアプリケーションです。
-単語レベルに基づいたランダムな学習ではなく、**自分の身の回りで実際に使う言葉を集め、オリジナルの単語帳を作成すること**で、効率的かつ実践的にハンガリー語を習得することを目指しています。
+単なる単語レベルでのランダムな学習ではなく、**「Kontextus」（コンテクストゥス＝文脈）**という名前の通り、**自分の身の回りで実際に使う言葉を文脈とともに集め、オリジナルの単語帳を作成すること**で、効率的かつ実践的にハンガリー語を習得することを目指しています。
 AI講師とのチャット、文法解説付きの翻訳、画像解析による学習など、多彩な機能であなたの学習をサポートします。
 
 ## 主な機能
