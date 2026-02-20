@@ -7,16 +7,16 @@ dotenv.config();
 // Define promotional post patterns
 const promotionPatterns = [
   // Pattern 1: Focus on AI Chat
-  "Sziasztok! 🇭🇺\nWant to master Hungarian practically?\n\n'Hungarian Study Tenju' features an AI language tutor to help you practice conversations!\n\nTry it now! 👇\nhttps://hungarian-study-tenju.web.app/\n#Hungarian #LanguageLearning",
+  "Sziasztok! 🇭🇺\nWant to master Hungarian practically?\n\n'Hungarian Study Tenju' features an AI language tutor to help you practice conversations!\n\nTry it now! 👇\nhttps://google-ai-hungarian-study.vercel.app/\n#Hungarian #LanguageLearning",
 
   // Pattern 2: Focus on Smart Translate
-  "Jó napot! 🇭🇺\nStruggling with Hungarian grammar?\n\nOur app's 'Smart Translate' provides deep grammar insights & example sentences to help you!\n\nLevel up today! 👇\nhttps://hungarian-study-tenju.web.app/\n#LearnHungarian #Magyar",
+  "Jó napot! 🇭🇺\nStruggling with Hungarian grammar?\n\nOur app's 'Smart Translate' provides deep grammar insights & example sentences to help you!\n\nLevel up today! 👇\nhttps://google-ai-hungarian-study.vercel.app/\n#LearnHungarian #Magyar",
 
   // Pattern 3: Focus on SM-2 Repetition Quiz
-  "Szia! 🇭🇺\nTired of forgetting what you learned?\n\n'Hungarian Study Tenju' uses an SM-2 spaced-repetition algorithm to make words stick!\n\nBuild your vocabulary! 👇\nhttps://hungarian-study-tenju.web.app/\n#HungarianLanguage #StudyTips",
+  "Szia! 🇭🇺\nTired of forgetting what you learned?\n\n'Hungarian Study Tenju' uses an SM-2 spaced-repetition algorithm to make words stick!\n\nBuild your vocabulary! 👇\nhttps://google-ai-hungarian-study.vercel.app/\n#HungarianLanguage #StudyTips",
 
   // Pattern 4: General Appeal
-  "Hungarian is challenging, but it doesn't have to be frustrating! 🇭🇺✨\n\nMake your learning efficient with our AI chats & optimized quizzes.\n\nCheck it out! 👇\nhttps://hungarian-study-tenju.web.app/\n#LanguageApp #Hungarian",
+  "Hungarian is challenging, but it doesn't have to be frustrating! 🇭🇺✨\n\nMake your learning efficient with our AI chats & optimized quizzes.\n\nCheck it out! 👇\nhttps://google-ai-hungarian-study.vercel.app/\n#LanguageApp #Hungarian",
 ];
 
 async function postToX() {

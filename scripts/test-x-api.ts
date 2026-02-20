@@ -41,7 +41,7 @@ async function testXApi() {
     
     // Next, test URL
     console.log('\nTesting Write Access with URL...');
-    const urlText = `API URL test: https://hungarian-study-tenju.web.app/ ${new Date().toISOString()}`;
+    const urlText = `API URL test: https://google-ai-hungarian-study.vercel.app/ ${new Date().toISOString()}`;
     const response2 = await client.v2.tweet(urlText);
     console.log('✅ Write Access OK (With URL)! Tweet ID:', response2.data.id);
     
