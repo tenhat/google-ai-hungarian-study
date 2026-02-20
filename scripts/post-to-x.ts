@@ -7,16 +7,16 @@ dotenv.config();
 // Define promotional post patterns
 const promotionPatterns = [
   // Pattern 1: Focus on AI Chat
-  "Sziasztok! 🇭🇺\nWant to master Hungarian practically?\n\n'Hungarian Study Tenju' features an AI language tutor! Practice real-life conversations, get instant grammar corrections, and build your vocabulary directly from the context.\n\nTry it now for free! 👇\nhttps://hungarian-study-tenju.web.app/ \n#Hungarian #LanguageLearning #AI",
+  "Sziasztok! 🇭🇺\nWant to master Hungarian practically?\n\n'Hungarian Study Tenju' features an AI language tutor to help you practice conversations!\n\nTry it now! 👇\nhttps://hungarian-study-tenju.web.app/\n#Hungarian #LanguageLearning",
 
   // Pattern 2: Focus on Smart Translate
-  "Jó napot! 🇭🇺\nStruggling with Hungarian grammar?\n\nOur app's 'Smart Translate' goes beyond simple translations. It provides deep grammar insights and example sentences to help you truly understand how Hungarian works.\n\nLevel up your learning today! 👇\nhttps://hungarian-study-tenju.web.app/ \n#LearnHungarian #Magyar #LanguageLearning",
+  "Jó napot! 🇭🇺\nStruggling with Hungarian grammar?\n\nOur app's 'Smart Translate' provides deep grammar insights & example sentences to help you!\n\nLevel up today! 👇\nhttps://hungarian-study-tenju.web.app/\n#LearnHungarian #Magyar",
 
   // Pattern 3: Focus on SM-2 Repetition Quiz
-  "Szia! 🇭🇺\nTired of forgetting what you learned?\n\n'Hungarian Study Tenju' uses an SM-2 spaced-repetition algorithm for quizzes. Review the words YOU collected exactly when you need to, making them stick for good!\n\nStart building your vocabulary! 👇\nhttps://hungarian-study-tenju.web.app/ \n#HungarianLanguage #StudyTips",
+  "Szia! 🇭🇺\nTired of forgetting what you learned?\n\n'Hungarian Study Tenju' uses an SM-2 spaced-repetition algorithm to make words stick!\n\nBuild your vocabulary! 👇\nhttps://hungarian-study-tenju.web.app/\n#HungarianLanguage #StudyTips",
 
   // Pattern 4: General Appeal
-  "Hungarian is known to be challenging, but it doesn't have to be frustrating! 🇭🇺✨\n\n'Hungarian Study Tenju' is designed to make your learning journey efficient and engaging with AI chats, grammar breakdowns, and optimized quizzes.\n\nCheck it out! 👇\nhttps://hungarian-study-tenju.web.app/ \n#LanguageApp #Hungarian",
+  "Hungarian is challenging, but it doesn't have to be frustrating! 🇭🇺✨\n\nMake your learning efficient with our AI chats & optimized quizzes.\n\nCheck it out! 👇\nhttps://hungarian-study-tenju.web.app/\n#LanguageApp #Hungarian",
 ];
 
 async function postToX() {
