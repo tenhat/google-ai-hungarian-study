@@ -3,6 +3,7 @@ import { BookMarked, LogIn, LogOut, User, Globe, Coins, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTokens } from '../../hooks/useTokens';
+import PomodoroTimer from './PomodoroTimer';
 
 const Header: React.FC = () => {
   const { user, signInWithGoogle, logout } = useAuth();
@@ -30,9 +31,11 @@ const Header: React.FC = () => {
         </div>
         
         <div className="flex items-center gap-4">
+            <PomodoroTimer />
+            
             <button 
                 onClick={toggleLanguage}
-                className="flex items-center gap-1 p-2 text-slate-500 hover:text-blue-600 transition-colors rounded-lg hover:bg-slate-50"
+                className="flex items-center gap-1 p-2 text-slate-500 hover:text-blue-600 transition-colors rounded-lg hover:bg-slate-50 hidden md:flex"
                 title="Switch Language"
             >
                 <Globe size={20} />
@@ -45,7 +48,7 @@ const Header: React.FC = () => {
                         <>
                             <button 
                                 onClick={toggleTokenDetails}
-                                className="flex items-center gap-1.5 bg-amber-100 text-amber-700 px-3 py-1.5 rounded-full mr-1 shadow-sm border border-amber-200 hover:bg-amber-200 transition-colors"
+                                className="flex items-center gap-1.5 bg-amber-100 text-amber-700 px-3 py-1.5 rounded-full mr-1 shadow-sm border border-amber-200 hover:bg-amber-200 transition-colors hidden sm:flex"
                             >
                                 <Coins size={16} className="fill-amber-500 text-amber-600" />
                                 <span className="text-sm font-bold min-w-[1.5rem] text-center">{totalRemaining}</span>
@@ -85,11 +88,11 @@ const Header: React.FC = () => {
                                 <User size={20} />
                             </div>
                         )}
-                        <span className="text-sm text-slate-600 font-medium hidden md:block">{user.displayName}</span>
+                        <span className="text-sm text-slate-600 font-medium hidden lg:block">{user.displayName}</span>
                     </div>
                     <button 
                         onClick={logout} 
-                        className="text-slate-500 hover:text-red-500 transition-colors"
+                        className="text-slate-500 hover:text-red-500 transition-colors hidden sm:block"
                         title="ログアウト"
                     >
                         <LogOut size={20} />
@@ -101,7 +104,7 @@ const Header: React.FC = () => {
                     className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
                 >
                     <LogIn size={18} />
-                    <span>Googleでログイン</span>
+                    <span className="hidden sm:inline">Googleでログイン</span>
                 </button>
             )}
         </div>
