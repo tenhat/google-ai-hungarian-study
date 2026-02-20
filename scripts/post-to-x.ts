@@ -54,7 +54,9 @@ async function postToX() {
   const dayOfYear = Math.floor(diff / oneDay);
   
   const selectedPatternIndex = dayOfYear % promotionPatterns.length;
-  const postContent = promotionPatterns[selectedPatternIndex];
+  // Xの重複投稿スパムフィルター（403エラー）を回避するため、末尾に実行日付を付与する
+  const todayStr = now.toISOString().split('T')[0];
+  const postContent = promotionPatterns[selectedPatternIndex] + `\n\n[Auto: ${todayStr}]`;
 
   console.log(`Day of Year: ${dayOfYear}`);
   console.log(`Selected Pattern Index: ${selectedPatternIndex}`);
