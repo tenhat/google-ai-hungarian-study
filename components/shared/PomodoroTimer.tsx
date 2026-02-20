@@ -30,13 +30,13 @@ const PomodoroTimer: React.FC = () => {
   };
 
   return (
-    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border shadow-sm transition-colors ${getModeColor()}`}>
-      <div className="flex items-center justify-center p-1 bg-white/50 rounded-full">
+    <div className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full border shadow-sm transition-colors ${getModeColor()}`}>
+      <div className="hidden sm:flex items-center justify-center p-1 bg-white/50 rounded-full">
         {getModeIcon()}
       </div>
       
-      <div className="flex flex-col items-center justify-center min-w-[3rem]">
-        <span className="text-sm font-bold leading-none tracking-wider">
+      <div className="flex flex-col items-center justify-center min-w-[2.5rem] sm:min-w-[3rem]">
+        <span className="text-xs sm:text-sm font-bold leading-none tracking-wider">
           {formatTime(timeLeft)}
         </span>
         <div className="flex gap-0.5 mt-0.5">

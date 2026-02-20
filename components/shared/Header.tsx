@@ -23,23 +23,23 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="bg-white shadow-md sticky top-0 z-10">
-      <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-            <BookMarked className="text-blue-600" size={32} />
-            <h1 className="text-xl font-bold text-slate-800">{t('home.title')}</h1>
+    <header className="bg-white shadow-md sticky top-0 z-10 w-full overflow-hidden">
+      <div className="container mx-auto px-2 sm:px-4 py-2 sm:py-3 flex items-center justify-between">
+        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+            <BookMarked className="text-blue-600 flex-shrink-0" size={28} />
+            <h1 className="text-base sm:text-xl font-bold text-slate-800 hidden sm:block whitespace-nowrap">{t('home.title')}</h1>
         </div>
         
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4 shrink-0 overflow-hidden">
             <PomodoroTimer />
             
             <button 
                 onClick={toggleLanguage}
-                className="flex items-center gap-1 p-2 text-slate-500 hover:text-blue-600 transition-colors rounded-lg hover:bg-slate-50 hidden md:flex"
+                className="flex items-center gap-1 p-1 sm:p-2 text-slate-500 hover:text-blue-600 transition-colors rounded-lg hover:bg-slate-50"
                 title="Switch Language"
             >
-                <Globe size={20} />
-                <span className="text-sm font-medium uppercase">{i18n.language.startsWith('en') ? 'EN' : 'JA'}</span>
+                <Globe size={20} className="shrink-0" />
+                <span className="text-xs sm:text-sm font-medium uppercase hidden sm:inline">{i18n.language.startsWith('en') ? 'EN' : 'JA'}</span>
             </button>
 
             {user ? (
@@ -48,10 +48,10 @@ const Header: React.FC = () => {
                         <>
                             <button 
                                 onClick={toggleTokenDetails}
-                                className="flex items-center gap-1.5 bg-amber-100 text-amber-700 px-3 py-1.5 rounded-full mr-1 shadow-sm border border-amber-200 hover:bg-amber-200 transition-colors hidden sm:flex"
+                                className="flex items-center gap-1 bg-amber-100 text-amber-700 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full shadow-sm border border-amber-200 hover:bg-amber-200 transition-colors"
                             >
-                                <Coins size={16} className="fill-amber-500 text-amber-600" />
-                                <span className="text-sm font-bold min-w-[1.5rem] text-center">{totalRemaining}</span>
+                                <Coins size={16} className="fill-amber-500 text-amber-600 shrink-0" />
+                                <span className="text-xs sm:text-sm font-bold min-w-[1rem] sm:min-w-[1.5rem] text-center">{totalRemaining}</span>
                             </button>
 
                             {showTokenDetails && (
@@ -92,7 +92,7 @@ const Header: React.FC = () => {
                     </div>
                     <button 
                         onClick={logout} 
-                        className="text-slate-500 hover:text-red-500 transition-colors hidden sm:block"
+                        className="text-slate-500 hover:text-red-500 transition-colors p-1"
                         title="ログアウト"
                     >
                         <LogOut size={20} />
