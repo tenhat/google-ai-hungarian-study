@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useWordBank } from '../hooks/useWordBank';
 import { Word } from '../types';
-import { Trophy, RefreshCw, Volume2, ArrowRight, CheckCircle2, XCircle, Target, Play } from 'lucide-react';
+import { Trophy, RefreshCw, Volume2, ArrowRight, CheckCircle2, XCircle, Target, Play, HelpCircle } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useTranslation } from 'react-i18next';
 
@@ -116,6 +116,18 @@ const ReviewChallenge: React.FC = () => {
     setHasStarted(true);
   };
 
+  const handleNext = () => {
+    if (currentIndex < quizWords.length - 1) {
+      setCurrentIndex(prev => prev + 1);
+      setSelectedOption(null);
+      setIsCorrect(null);
+    } else {
+      setIsFinished(true);
+    }
+    // 画面を一番上にスクロール
+    window.scrollTo(0, 0);
+  };
+
   const handleAnswer = (option: string) => {
     if (selectedOption) return;
 
@@ -136,6 +148,11 @@ const ReviewChallenge: React.FC = () => {
         origin: { y: 0.6 },
         colors: ['#22c55e', '#3b82f6', '#fbbf24', '#f87171']
       });
+
+      // 正解時は自動で次へ進む
+      setTimeout(() => {
+        handleNext();
+      }, 1500);
     } else {
       setIncorrectCount(prev => prev + 1);
       // 不正解時は間隔リセット
@@ -143,16 +160,13 @@ const ReviewChallenge: React.FC = () => {
     }
   };
 
-  const handleNext = () => {
-    if (currentIndex < quizWords.length - 1) {
-      setCurrentIndex(prev => prev + 1);
-      setSelectedOption(null);
-      setIsCorrect(null);
-    } else {
-      setIsFinished(true);
-    }
-    // 画面を一番上にスクロール
-    window.scrollTo(0, 0);
+  const handleGiveUp = () => {
+    if (selectedOption) return;
+    
+    setSelectedOption('__GIVE_UP__');
+    setIsCorrect(false);
+    setIncorrectCount(prev => prev + 1);
+    resetWordProgress(currentWord.id);
   };
 
   const playAudio = () => {
@@ -362,6 +376,18 @@ const ReviewChallenge: React.FC = () => {
             })}
           </div>
 
+          {!selectedOption && (
+              <div className="flex justify-center mb-4">
+                  <button 
+                      onClick={handleGiveUp}
+                      className="flex items-center gap-1.5 text-slate-400 hover:text-slate-600 font-medium px-4 py-1.5 rounded-full hover:bg-slate-100 transition-colors text-xs"
+                  >
+                      <HelpCircle size={16} />
+                      <span>{t('quiz.unknown')}</span>
+                  </button>
+              </div>
+          )}
+
           {/* 結果と次へ */}
           {selectedOption && (
             <div className="mt-auto animate-fade-in">
@@ -396,23 +422,25 @@ const ReviewChallenge: React.FC = () => {
                 </div>
               </div>
 
-              <button
-                onClick={handleNext}
-                className="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white font-bold py-3.5 rounded-xl shadow-lg hover:shadow-orange-200 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-base"
-                autoFocus
-              >
-                {currentIndex < quizWords.length - 1 ? (
-                  <>
-                    {t('review.nextQuestion')}
-                    <ArrowRight size={18} />
-                  </>
-                ) : (
-                  <>
-                    {t('review.finishChallenge')}
-                    <Trophy size={18} />
-                  </>
-                )}
-              </button>
+              {!isCorrect && (
+                <button
+                  onClick={handleNext}
+                  className="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white font-bold py-3.5 rounded-xl shadow-lg hover:shadow-orange-200 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-base"
+                  autoFocus
+                >
+                  {currentIndex < quizWords.length - 1 ? (
+                    <>
+                      {t('review.nextQuestion')}
+                      <ArrowRight size={18} />
+                    </>
+                  ) : (
+                    <>
+                      {t('review.finishChallenge')}
+                      <Trophy size={18} />
+                    </>
+                  )}
+                </button>
+              )}
             </div>
           )}
         </div>
