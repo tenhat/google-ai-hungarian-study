@@ -9,12 +9,14 @@ describe('types.ts', () => {
       expect(View.Chat).toBe('Chat');
       expect(View.Translate).toBe('Translate');
       expect(View.ReviewChallenge).toBe('ReviewChallenge');
+      expect(View.ListeningMode).toBe('ListeningMode');
       expect(View.PlacementTest).toBe('PlacementTest');
+      expect(View.StudyStats).toBe('StudyStats');
     });
 
-    it('should have 7 view types', () => {
+    it('should have 8 view types', () => {
       const viewValues = Object.values(View);
-      expect(viewValues).toHaveLength(7);
+      expect(viewValues).toHaveLength(8);
     });
   });
 
