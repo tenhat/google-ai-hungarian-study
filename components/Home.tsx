@@ -6,6 +6,7 @@ import { useHungarianLevel } from '../hooks/useHungarianLevel';
 import { BrainCircuit, MessageSquare, CheckCircle, Clock, Star, Loader, Award } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import WordList from './WordList';
+import { LoadingTip } from './shared/LoadingTip';
 
 interface HomeProps {
   setCurrentView: (view: View) => void;
@@ -24,7 +25,10 @@ const Home: React.FC<HomeProps> = ({ setCurrentView }) => {
     return (
       <div className="flex-grow flex flex-col justify-center items-center p-4">
         <Loader className="animate-spin text-blue-600" size={48} />
-        <p className="text-slate-500 mt-4 font-medium">{t('common.loading')}</p>
+        <p className="text-slate-500 mt-4 font-medium mb-6">{t('common.loading')}</p>
+        <div className="max-w-md w-full">
+            <LoadingTip />
+        </div>
       </div>
     );
   }

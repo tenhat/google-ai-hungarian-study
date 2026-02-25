@@ -8,6 +8,8 @@ import { useWordBank } from '../hooks/useWordBank';
 import { useTokens } from '../hooks/useTokens';
 import { useAuth } from '../contexts/AuthContext';
 import TokenConfirmModal, { shouldSkipConfirm } from './shared/TokenConfirmModal';
+import { LoadingTip } from './shared/LoadingTip';
+
 const Chat: React.FC = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
@@ -511,18 +513,23 @@ const Chat: React.FC = () => {
           </div>
         ))}
         {isLoading && (
-            <div className="flex items-end gap-2 justify-start animate-fade-in">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white flex-shrink-0 shadow-md">
-                    <Sparkles size={16} className="animate-pulse" />
-                </div>
-                <div className="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm rounded-bl-sm">
-                    <div className="flex items-center gap-1.5">
-                        <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                        <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                        <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-                    </div>
-                    <p className="text-xs text-slate-400 mt-2 font-medium">{t('chat.thinking')}</p>
-                </div>
+            <div className="flex flex-col gap-2 animate-fade-in">
+              <div className="flex items-end gap-2 justify-start">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white flex-shrink-0 shadow-md">
+                      <Sparkles size={16} className="animate-pulse" />
+                  </div>
+                  <div className="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm rounded-bl-sm">
+                      <div className="flex items-center gap-1.5">
+                          <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                          <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                          <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                      </div>
+                      <p className="text-xs text-slate-400 mt-2 font-medium">{t('chat.thinking')}</p>
+                  </div>
+              </div>
+              <div className="ml-10 max-w-[85%] md:max-w-md lg:max-w-lg">
+                  <LoadingTip className="mt-0" />
+              </div>
             </div>
         )}
         <div ref={messagesEndRef} />

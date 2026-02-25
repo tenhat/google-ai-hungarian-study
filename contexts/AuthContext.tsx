@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../services/firebase';
+import { Loader2 } from 'lucide-react';
+import { LoadingTip } from '../components/shared/LoadingTip';
 
 interface AuthContextType {
   user: User | null;
@@ -42,7 +44,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   return (
     <AuthContext.Provider value={{ user, loading, signInWithGoogle, logout }}>
-      {children}
+      {loading ? (
+        <div className="flex-grow flex flex-col justify-center items-center p-4 min-h-screen bg-slate-100">
+           <Loader2 className="animate-spin text-indigo-500" size={48} />
+           <p className="text-slate-500 mt-4 font-medium mb-6">ロード中...</p>
+           <div className="max-w-md w-full">
+               <LoadingTip />
+           </div>
+        </div>
+      ) : (
+        children
+      )}
     </AuthContext.Provider>
   );
 };

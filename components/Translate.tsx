@@ -8,6 +8,7 @@ import { useWordBank } from '../hooks/useWordBank';
 import { useTokens } from '../hooks/useTokens';
 import { useAuth } from '../contexts/AuthContext';
 import TokenConfirmModal, { shouldSkipConfirm } from './shared/TokenConfirmModal';
+import { LoadingTip } from './shared/LoadingTip';
 
 // Web Speech API の型定義
 interface SpeechRecognitionEvent extends Event {
@@ -413,6 +414,7 @@ const Translate: React.FC = () => {
             </>
           )}
         </button>
+        {isLoading && <LoadingTip />}
       </div>
 
       {/* 結果表示エリア */}

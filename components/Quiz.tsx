@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useWordBank } from '../hooks/useWordBank';
 import { Word, QuizMode, View } from '../types';
-import { ArrowRight, Volume2, Check, X, CheckCircle, HelpCircle, XCircle } from 'lucide-react';
+import { ArrowRight, Volume2, Check, X, CheckCircle, HelpCircle, XCircle, Loader2 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useTranslation } from 'react-i18next';
+import { LoadingTip } from './shared/LoadingTip';
 
 interface QuizProps {
   setCurrentView: (view: View) => void;
@@ -212,8 +213,15 @@ const Quiz: React.FC<QuizProps> = ({ setCurrentView }) => {
 
 
   if (loading || !hasInitialized) {
-     // Show loading or empty state if needed
-     return <div className="text-center p-4">{t('common.loading')}</div>; 
+     return (
+       <div className="flex flex-col items-center justify-center h-full p-4 space-y-4">
+         <Loader2 className="animate-spin text-indigo-500" size={32} />
+         <p className="text-slate-500">{t('common.loading')}</p>
+         <div className="max-w-md w-full">
+           <LoadingTip />
+         </div>
+       </div>
+     ); 
   }
 
   if (quizItems.length === 0) {
