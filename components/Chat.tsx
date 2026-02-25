@@ -9,11 +9,13 @@ import { useTokens } from '../hooks/useTokens';
 import { useAuth } from '../contexts/AuthContext';
 import TokenConfirmModal, { shouldSkipConfirm } from './shared/TokenConfirmModal';
 import { LoadingTip } from './shared/LoadingTip';
+import { useHungarianLevel } from '../hooks/useHungarianLevel';
 
 const Chat: React.FC = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { consumeTokens, hasEnoughTokens } = useTokens();
+  const { level } = useHungarianLevel();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [userInput, setUserInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -128,10 +130,6 @@ const Chat: React.FC = () => {
   };
 
   const doSendMessage = async (input: string) => {
-    const totalCost = TOKEN_COSTS.chatResponse + TOKEN_COSTS.grammarCorrection;
-    const consumed = await consumeTokens(totalCost);
-    if (!consumed) return;
-
     const userMessage: ChatMessage = {
       id: `user-${Date.now()}`,
       role: 'user',
@@ -143,24 +141,37 @@ const Chat: React.FC = () => {
     setUserInput('');
     setIsLoading(true);
 
-    const correction = await getGrammarCorrection(input);
-    
-    setMessages(prev => prev.map(msg => msg.id === userMessage.id ? {...msg, correction} : msg));
+    const totalCost = TOKEN_COSTS.chatResponse + TOKEN_COSTS.grammarCorrection;
+    const consumed = await consumeTokens(totalCost);
+    if (!consumed) {
+      setMessages(prev => prev.filter(msg => msg.id !== userMessage.id)); // Rollback message
+      setIsLoading(false);
+      return;
+    }
 
-    const correctedSentence = correction.isCorrect ? input : (correction.correctedSentence || input);
-    const { text: aiResponseText, translation, segments } = await getChatResponse(messages, correctedSentence);
+    try {
+      const correction = await getGrammarCorrection(input);
+      
+      setMessages(prev => prev.map(msg => msg.id === userMessage.id ? {...msg, correction} : msg));
 
-    const aiMessage: ChatMessage = {
-      id: `model-${Date.now()}`,
-      role: 'model',
-      text: aiResponseText,
-      translation: translation,
-      segments: segments,
-      timestamp: Date.now(),
-    };
+      const correctedSentence = correction.isCorrect ? input : (correction.correctedSentence || input);
+      const { text: aiResponseText, translation, segments } = await getChatResponse(messages, correctedSentence, level);
 
-    setMessages(prev => [...prev, aiMessage]);
-    setIsLoading(false);
+      const aiMessage: ChatMessage = {
+        id: `model-${Date.now()}`,
+        role: 'model',
+        text: aiResponseText,
+        translation: translation,
+        segments: segments,
+        timestamp: Date.now(),
+      };
+
+      setMessages(prev => [...prev, aiMessage]);
+    } catch (error) {
+      console.error('Chat error:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // 画像選択処理

@@ -211,11 +211,14 @@ const Translate: React.FC = () => {
   };
 
   const doTranslate = async () => {
-    const consumed = await consumeTokens(TOKEN_COSTS.translation);
-    if (!consumed) return;
-
     setIsLoading(true);
     setResult(null);
+
+    const consumed = await consumeTokens(TOKEN_COSTS.translation);
+    if (!consumed) {
+      setIsLoading(false);
+      return;
+    }
 
     try {
       const translationResult = await getTranslation(inputText, direction);
