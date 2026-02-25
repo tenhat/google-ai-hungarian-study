@@ -1,6 +1,6 @@
 
 import { GoogleGenAI, Chat, GenerateContentResponse, Type } from "@google/genai";
-import { ChatMessage, Correction, TranslationResult } from "../types";
+import { ChatMessage, Correction, TranslationResult, CEFRLevel } from "../types";
 
 const getApiKey = () => import.meta.env.VITE_GEMINI_API_KEY || (typeof process !== 'undefined' ? process.env.GEMINI_API_KEY : undefined);
 
@@ -17,24 +17,43 @@ function getAiInstance(): GoogleGenAI {
 }
 
 let chatInstance: Chat | null = null;
+let currentChatLevel: string | null = null;
 
-function getChatInstance(): Chat {
-  if (!chatInstance) {
+function getTargetLevel(userLevel?: CEFRLevel | null): string | undefined {
+    if (!userLevel) return undefined;
+    const levelMap: Record<CEFRLevel, string> = {
+        'A1': 'A2',
+        'A2': 'B1',
+        'B1': 'B2',
+        'B2': 'C1',
+        'C1': 'C1'
+    };
+    return levelMap[userLevel];
+}
+
+function getChatInstance(targetLevel?: string): Chat {
+  if (!chatInstance || currentChatLevel !== targetLevel) {
     const ai = getAiInstance();
+    const levelPrompt = targetLevel 
+        ? `The user's target learning level is CEFR ${targetLevel}. Please provide natural, complete sentences that demonstrate vocabulary and grammar appropriate for a ${targetLevel} level learner.` 
+        : `Please provide natural, complete sentences that are helpful for a beginner-to-intermediate learner.`;
+
     chatInstance = ai.chats.create({
       model: 'gemini-2.5-flash',
       config: {
-        systemInstruction: "You are a friendly and patient Hungarian language tutor. Your replies must be in JSON format with three keys: 'hungarian' (your full reply in Hungarian), 'japanese' (the full Japanese translation), and 'segments' (an array of objects, each containing 'hungarian' and 'japanese' keys representing corresponding sentence pairs). Avoid overly short or curt responses. Instead, provide natural, complete sentences that are helpful for a beginner-to-intermediate learner. Do not use markdown in the content.",
+        systemInstruction: `You are a friendly and patient Hungarian language tutor. Your replies must be in JSON format with three keys: 'hungarian' (your full reply in Hungarian), 'japanese' (the full Japanese translation), and 'segments' (an array of objects, each containing 'hungarian' and 'japanese' keys representing corresponding sentence pairs). Avoid overly short or curt responses. ${levelPrompt} Do not use markdown in the content.`,
         responseMimeType: "application/json",
       },
     });
+    currentChatLevel = targetLevel || null;
   }
   return chatInstance;
 }
 
 
-export async function getChatResponse(history: ChatMessage[], newMessage: string): Promise<{ text: string, translation: string, segments?: { hungarian: string, japanese: string }[] }> {
-  const chat = getChatInstance();
+export async function getChatResponse(history: ChatMessage[], newMessage: string, userLevel?: CEFRLevel | null): Promise<{ text: string, translation: string, segments?: { hungarian: string, japanese: string }[] }> {
+  const targetLevel = getTargetLevel(userLevel);
+  const chat = getChatInstance(targetLevel);
   try {
     const response: GenerateContentResponse = await chat.sendMessage({ message: newMessage });
     // @ts-ignore - The SDK types might be confusing vs runtime behavior or I am misinterpreting, but relying on previous 'response.text' property usage.
